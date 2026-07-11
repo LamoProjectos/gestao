@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: lamo-gestao
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn gestao.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://postgres:akame2424.,@db.wlvlxlcepshwezgpvhep.supabase.co:5432/postgres?sslmode=require
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://*.onrender.com
+    preDeployCommand: python manage.py migrate && python manage.py setup_users
