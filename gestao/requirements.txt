@@ -1,0 +1,8 @@
+django>=5.0
+weasyprint>=60
+pillow
+reportlab
+gunicorn>=21
+dj-database-url>=2
+psycopg2-binary>=2.9
+whitenoise>=6

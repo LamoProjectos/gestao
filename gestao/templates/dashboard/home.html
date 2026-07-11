@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block content %}
+
+{% if pagamentos_atrasados or pagamentos_proximos or etapas_atrasadas or etapas_proximas %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="table-container border-start border-4 border-warning">
+            <h6 class="fw-bold mb-3"><i class="bi bi-exclamation-triangle me-2 text-warning"></i>⚠️ A Vencer em Breve</h6>
+            <div class="row g-2">
+                {% for pag in pagamentos_atrasados %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-danger border-1 h-100">
+                        <div class="card-body py-2 px-3">
+                            <small class="text-danger fw-bold"><i class="bi bi-x-circle me-1"></i>Pag. Vencido</small>
+                            <div class="fw-semibold small">{{ pag.cotacao.cliente.nome }}</div>
+                            <div class="text-muted small">{{ pag.cotacao.numero }} — {{ pag.prestacao }}ª</div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span class="fw-bold text-danger">{{ pag.valor|floatformat:0 }} MZN</span>
+                                <span class="text-muted small">Venceu {{ pag.data_vencimento|date:"d/m" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for pag in pagamentos_proximos %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-warning border-1 h-100">
+                        <div class="card-body py-2 px-3">
+                            <small class="text-warning fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Pag. Próximo</small>
+                            <div class="fw-semibold small">{{ pag.cotacao.cliente.nome }}</div>
+                            <div class="text-muted small">{{ pag.cotacao.numero }} — {{ pag.prestacao }}ª</div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <span class="fw-bold text-warning">{{ pag.valor|floatformat:0 }} MZN</span>
+                                <span class="text-muted small">{{ pag.data_vencimento|date:"d/m" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for etapa in etapas_atrasadas %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-danger border-1 h-100">
+                        <div class="card-body py-2 px-3">
+                            <small class="text-danger fw-bold"><i class="bi bi-x-circle me-1"></i>Etapa Atrasada</small>
+                            <div class="fw-semibold small">{{ etapa.nome }}</div>
+                            <div class="text-muted small">{{ etapa.projeto.nome }}</div>
+                            <div class="text-muted small">Prevista: {{ etapa.data_prevista|date:"d/m" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% for etapa in etapas_proximas %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border-warning border-1 h-100">
+                        <div class="card-body py-2 px-3">
+                            <small class="text-warning fw-bold"><i class="bi bi-exclamation-triangle me-1"></i>Etapa Próxima</small>
+                            <div class="fw-semibold small">{{ etapa.nome }}</div>
+                            <div class="text-muted small">{{ etapa.projeto.nome }}</div>
+                            <div class="text-muted small">{{ etapa.data_prevista|date:"d/m" }}</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32;">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ total_clientes }}</div>
+                        <div class="stat-label">Clientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#e3f2fd;color:#1565c0;">
+                        <i class="bi bi-building"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ projetos_ativos }}</div>
+                        <div class="stat-label">Projetos Ativos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#e8f5e9;color:#2e7d32;">
+                        <i class="bi bi-wallet2"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number {% if saldo_caixa < 0 %}text-danger{% endif %}">{{ saldo_caixa|floatformat:2 }}</div>
+                        <div class="stat-label">Saldo Caixa (MZN)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon" style="background:#fce4ec;color:#c62828;">
+                        <i class="bi bi-file-text"></i>
+                    </div>
+                    <div>
+                        <div class="stat-number">{{ cotacoes_pendentes }}</div>
+                        <div class="stat-label">Cotações Pendentes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Últimos Clientes</h6>
+                <a href="{% url 'crm_lista' %}" class="btn btn-sm btn-outline-accent">Ver Todos</a>
+            </div>
+            {% if ultimos_clientes %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Contacto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in ultimos_clientes %}
+                    <tr>
+                        <td><a href="{% url 'crm_editar' c.pk %}" class="text-decoration-none fw-medium">{{ c.nome }}</a></td>
+                        <td>{{ c.telefone|default:'-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-people"></i>
+                <p class="mb-0">Nenhum cliente cadastrado</p>
+                <a href="{% url 'crm_novo' %}" class="btn btn-accent mt-2">Cadastrar Cliente</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-file-earmark-text me-2"></i>Últimas Cotações</h6>
+                <a href="{% url 'financial_lista' %}" class="btn btn-sm btn-outline-accent">Ver Todas</a>
+            </div>
+            {% if ultimas_cotacoes %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Nº</th>
+                        <th>Cliente</th>
+                        <th>Valor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in ultimas_cotacoes %}
+                    <tr>
+                        <td><a href="{% url 'financial_detalhe' q.pk %}" class="text-decoration-none">{{ q.numero }}</a></td>
+                        <td>{{ q.cliente.nome }}</td>
+                        <td>{{ q.valor_total|floatformat:2 }} MZN</td>
+                        <td><span class="badge bg-{% if q.status == 'aprovada' %}success{% elif q.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">{{ q.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-file-earmark-text"></i>
+                <p class="mb-0">Nenhuma cotação emitida</p>
+                <a href="{% url 'financial_nova' %}" class="btn btn-accent mt-2">Nova Cotação</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-building me-2"></i>Projetos Recentes</h6>
+                <a href="{% url 'projects_lista' %}" class="btn btn-sm btn-outline-accent">Ver Todos</a>
+            </div>
+            {% if ultimos_projetos %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Projeto</th>
+                        <th>Cliente</th>
+                        <th>Tipo</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in ultimos_projetos %}
+                    <tr>
+                        <td><a href="{% url 'projects_detalhe' p.pk %}" class="text-decoration-none fw-medium">{{ p.nome }}</a></td>
+                        <td>{{ p.cliente.nome }}</td>
+                        <td>{{ p.get_tipo_display }}</td>
+                        <td><span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% else %}primary{% endif %} badge-status">{{ p.get_status_display }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-building"></i>
+                <p class="mb-0">Nenhum projeto cadastrado</p>
+                <a href="{% url 'projects_novo' %}" class="btn btn-accent mt-2">Novo Projeto</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if ultimos_movimentos %}
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="table-container">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-wallet2 me-2"></i>Últimos Movimentos de Caixa</h6>
+                <a href="{% url 'financial_caixa_lista' %}" class="btn btn-sm btn-outline-accent">Ver Todos</a>
+            </div>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo</th>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in ultimos_movimentos %}
+                    <tr>
+                        <td>{{ m.data|date:'d/m/Y' }}</td>
+                        <td>
+                            {% if m.tipo == 'entrada' %}
+                            <span class="badge bg-success bg-opacity-10 text-success">Entrada</span>
+                            {% else %}
+                            <span class="badge bg-danger bg-opacity-10 text-danger">Saída</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ m.descricao|truncatewords:8 }}</td>
+                        <td class="fw-bold {% if m.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+                            {{ m.valor|floatformat:2 }} MZN
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

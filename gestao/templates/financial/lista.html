@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Cotações{% endblock %}
+{% block page_title %}Cotações{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div></div>
+    {% if is_admin %}<a href="{% url 'financial_nova' %}" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i> Nova Cotação</a>{% endif %}
+</div>
+
+<div class="table-container">
+    {% if cotacoes %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nº</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Valor Total</th>
+                <th>Saldo</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for q in cotacoes %}
+            <tr>
+                <td class="fw-medium">{{ q.numero }}</td>
+                <td>{{ q.cliente.nome }}</td>
+                <td>{{ q.data_emissao|date:'d/m/Y' }}</td>
+                <td>{{ q.valor_total|floatformat:2 }} MZN</td>
+                <td class="{% if q.saldo_pendente > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                    {{ q.saldo_pendente|floatformat:2 }} MZN
+                </td>
+                <td>
+                    <span class="badge bg-{% if q.status == 'aprovada' %}success{% elif q.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">
+                        {{ q.get_status_display }}
+                    </span>
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'financial_detalhe' q.pk %}" class="btn btn-sm btn-outline-accent" title="Detalhes"><i class="bi bi-eye"></i></a>
+                    {% if is_admin %}<a href="{% url 'doc_cotacao_pdf' q.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank" title="PDF"><i class="bi bi-filetype-pdf"></i></a>{% endif %}
+                    {% if is_admin %}<a href="{% url 'financial_editar' q.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-file-earmark-text"></i>
+        <p class="mb-2">Nenhuma cotação emitida</p>
+        {% if is_admin %}<a href="{% url 'financial_nova' %}" class="btn btn-accent">Emitir Primeira Cotação</a>{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

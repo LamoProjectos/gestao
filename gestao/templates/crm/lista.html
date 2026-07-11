@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Clientes{% endblock %}
+{% block page_title %}Clientes{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="busca" class="form-control" placeholder="Buscar cliente..." value="{{ busca }}" style="width:280px;">
+            <button type="submit" class="btn btn-accent"><i class="bi bi-search me-1"></i> Buscar</button>
+            {% if busca %}<a href="{% url 'crm_lista' %}" class="btn btn-outline-secondary">Limpar</a>{% endif %}
+        </form>
+    </div>
+    <a href="{% url 'crm_novo' %}" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i> Novo Cliente</a>
+</div>
+
+<div class="table-container">
+    {% if clientes %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Email</th>
+                <th>NUIT</th>
+                <th>Projetos</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in clientes %}
+            <tr>
+                <td class="fw-medium">{{ c.nome }}</td>
+                <td>{{ c.telefone|default:'-' }}</td>
+                <td>{{ c.email|default:'-' }}</td>
+                <td>{{ c.nuit|default:'-' }}</td>
+                <td>{{ c.projetos.count }}</td>
+                <td class="text-end">
+                    <a href="{% url 'crm_editar' c.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                    <a href="{% url 'projects_novo' %}?cliente={{ c.pk }}" class="btn btn-sm btn-outline-accent" title="Novo Projeto"><i class="bi bi-plus-circle"></i></a>
+                    <a href="{% url 'crm_excluir' c.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p class="mb-2">Nenhum cliente encontrado</p>
+        <a href="{% url 'crm_novo' %}" class="btn btn-accent">Cadastrar Primeiro Cliente</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

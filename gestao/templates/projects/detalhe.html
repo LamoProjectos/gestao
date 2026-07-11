@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}{{ projeto.nome }}{% endblock %}
+{% block page_title %}{{ projeto.nome }}{% endblock %}
+{% block content %}
+<div class="action-bar mb-3">
+    <a href="{% url 'doc_contrato_pdf' projeto.pk %}" class="btn btn-accent" target="_blank"><i class="bi bi-filetype-pdf me-1"></i> Contrato</a>
+    <a href="{% url 'projects_editar' projeto.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i> Editar</a>
+    <a href="{% url 'projects_excluir' projeto.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i> Excluir</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="detail-section">
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="detail-label">Cliente</div>
+                    <div class="detail-value">{{ projeto.cliente.nome }}</div>
+                </div>
+                <div class="col-6">
+                    <div class="detail-label">Tipo</div>
+                    <div class="detail-value">{{ projeto.get_tipo_display }}</div>
+                </div>
+                <div class="col-6">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="badge bg-{% if projeto.status == 'concluido' %}success{% elif projeto.status == 'cancelado' %}danger{% elif projeto.status == 'em_andamento' %}primary{% else %}warning{% endif %} badge-status">
+                            {{ projeto.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="detail-label">Valor Total</div>
+                    <div class="detail-value fw-bold" style="color:var(--accent);">{{ projeto.valor_total|floatformat:2 }} MZN</div>
+                </div>
+                <div class="col-6">
+                    <div class="detail-label">Data de Início</div>
+                    <div class="detail-value">{{ projeto.data_inicio|date:'d/m/Y'|default:'—' }}</div>
+                </div>
+                <div class="col-6">
+                    <div class="detail-label">Data de Entrega</div>
+                    <div class="detail-value">{{ projeto.data_entrega|date:'d/m/Y'|default:'—' }}</div>
+                </div>
+                {% if projeto.descricao %}
+                <div class="col-12">
+                    <div class="detail-label">Descrição</div>
+                    <div class="detail-value">{{ projeto.descricao|linebreaksbr }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="detail-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Cronograma / Etapas</h6>
+            </div>
+
+            <form method="post" action="{% url 'projects_nova_etapa' projeto.pk %}" class="mb-3 p-3" style="background:#f8f9fa;border-radius:12px;">
+                {% csrf_token %}
+                <div class="row g-2 align-items-end">
+                    <div class="col-2">
+                        <label class="form-label" style="font-size:0.75rem;">Ordem</label>
+                        <input type="number" name="ordem" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" style="font-size:0.75rem;">Etapa</label>
+                        <input type="text" name="nome" class="form-control form-control-sm" placeholder="Ex: Proposta inicial" required>
+                    </div>
+                    <div class="col-3">
+                        <label class="form-label" style="font-size:0.75rem;">Data Prevista</label>
+                        <input type="date" name="data_prevista" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-3">
+                        <button type="submit" class="btn btn-accent btn-sm w-100"><i class="bi bi-plus"></i> Adicionar</button>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <textarea name="descricao" class="form-control form-control-sm" placeholder="Descrição da etapa (opcional)" rows="1"></textarea>
+                    </div>
+                </div>
+            </form>
+
+            {% if etapas %}
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Etapa</th>
+                        <th>Data Prevista</th>
+                        <th>Concluída</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in etapas %}
+                    <tr>
+                        <td>{{ e.ordem }}</td>
+                        <td>{{ e.nome }}</td>
+                        <td>{{ e.data_prevista|date:'d/m/Y'|default:'—' }}</td>
+                        <td>
+                            {% if e.concluida %}
+                            <span class="badge bg-success badge-status"><i class="bi bi-check"></i> Sim</span>
+                            {% else %}
+                            <span class="badge bg-secondary badge-status">Não</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'projects_excluir_etapa' e.pk %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir etapa?')"><i class="bi bi-x"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted text-center mb-0 py-2">Nenhuma etapa definida. Adicione as etapas do cronograma acima.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="detail-section">
+            <h6 class="fw-bold mb-3"><i class="bi bi-cash-coin me-2"></i>Financeiro</h6>
+            {% with cotacao=projeto.cotacoes.last %}
+                {% if cotacao %}
+                <div class="mb-2">
+                    <div class="detail-label">Cotação</div>
+                    <div class="detail-value"><a href="{% url 'financial_detalhe' cotacao.pk %}">{{ cotacao.numero }}</a></div>
+                </div>
+                <div class="mb-2">
+                    <div class="detail-label">Valor Total</div>
+                    <div class="detail-value">{{ cotacao.valor_total|floatformat:2 }} MZN</div>
+                </div>
+                <div class="mb-2">
+                    <div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="badge bg-{% if cotacao.status == 'aprovada' %}success{% elif cotacao.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">
+                            {{ cotacao.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    <div class="detail-label">Saldo Pendente</div>
+                    <div class="detail-value fw-bold {% if cotacao.saldo_pendente > 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ cotacao.saldo_pendente|floatformat:2 }} MZN
+                    </div>
+                </div>
+                {% else %}
+                <p class="text-muted mb-0">Nenhuma cotação vinculada.</p>
+                <a href="{% url 'financial_nova' %}" class="btn btn-sm btn-accent mt-2"><i class="bi bi-plus"></i> Criar Cotação</a>
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="detail-section">
+            <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Informações do Cliente</h6>
+            <div class="mb-1"><span class="text-muted">Telefone:</span> {{ projeto.cliente.telefone|default:'—' }}</div>
+            <div class="mb-1"><span class="text-muted">Email:</span> {{ projeto.cliente.email|default:'—' }}</div>
+            <div class="mb-1"><span class="text-muted">Endereço:</span> {{ projeto.cliente.endereco|default:'—' }}</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

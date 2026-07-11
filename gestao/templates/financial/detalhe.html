@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}{{ cotacao.numero }}{% endblock %}
+{% block page_title %}Cotação {{ cotacao.numero }}{% endblock %}
+{% block content %}
+<div class="action-bar mb-3">
+    {% if is_admin %}<a href="{% url 'doc_cotacao_pdf' cotacao.pk %}" class="btn btn-accent" target="_blank"><i class="bi bi-filetype-pdf me-1"></i> PDF Cotação</a>{% endif %}
+    {% if is_admin %}<a href="{% url 'financial_editar' cotacao.pk %}" class="btn btn-outline-primary"><i class="bi bi-pencil me-1"></i> Editar</a>{% endif %}
+    <a href="{% url 'financial_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="detail-section">
+            <h6 class="fw-bold mb-3"><i class="bi bi-file-text me-2"></i>Detalhes da Cotação</h6>
+            <div class="row g-2">
+                <div class="col-6"><div class="detail-label">Número</div><div class="detail-value">{{ cotacao.numero }}</div></div>
+                <div class="col-6"><div class="detail-label">Data de Emissão</div><div class="detail-value">{{ cotacao.data_emissao|date:'d/m/Y' }}</div></div>
+                <div class="col-6"><div class="detail-label">Cliente</div><div class="detail-value">{{ cotacao.cliente.nome }}</div></div>
+                <div class="col-6"><div class="detail-label">Projeto</div><div class="detail-value">{{ cotacao.projeto.nome|default:'—' }}</div></div>
+                <div class="col-12"><div class="detail-label">Status</div>
+                    <div class="detail-value">
+                        <span class="badge bg-{% if cotacao.status == 'aprovada' %}success{% elif cotacao.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status fs-6">
+                            {{ cotacao.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-12"><div class="detail-label">Valor Total</div><div class="detail-value fs-4 fw-bold" style="color:var(--accent);">{{ cotacao.valor_total|floatformat:2 }} MZN</div></div>
+                {% if cotacao.observacoes %}
+                <div class="col-12"><div class="detail-label">Observações</div><div class="detail-value">{{ cotacao.observacoes|linebreaksbr }}</div></div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="detail-section">
+            <h6 class="fw-bold mb-3"><i class="bi bi-cash-stack me-2"></i>Prestações</h6>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Prestação</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Pagamento</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pagamentos %}
+                    <tr>
+                        <td>{{ p.prestacao }}ª</td>
+                        <td>{{ p.valor|floatformat:2 }} MZN</td>
+                        <td>{{ p.data_vencimento|date:'d/m/Y' }}</td>
+                        <td>{{ p.data_pagamento|date:'d/m/Y'|default:'—' }}</td>
+                        <td>
+                            <span class="badge bg-{% if p.status == 'pago' %}success{% elif p.status == 'atrasado' %}danger{% else %}warning{% endif %} badge-status">
+                                {{ p.get_status_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if p.status == 'pendente' and is_admin %}
+                            <a href="{% url 'financial_pagar' p.pk %}" class="btn btn-sm btn-success"><i class="bi bi-check-lg"></i> Pagar</a>
+                            {% elif p.status == 'pago' and is_admin %}
+                            <a href="{% url 'doc_recibo_pdf' p.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank" title="Recibo"><i class="bi bi-filetype-pdf"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="fw-bold">
+                        <td>Total</td>
+                        <td>{{ cotacao.valor_total|floatformat:2 }} MZN</td>
+                        <td colspan="4"></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

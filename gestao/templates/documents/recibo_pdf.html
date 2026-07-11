@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 1.2cm 1.5cm; size: A4; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; color: #333; line-height: 1.35; }
+        .header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #2563eb; padding-bottom: 6px; }
+        .header h1 { font-size: 15pt; color: #1a2332; margin: 0; }
+        .header .subtitle { font-size: 7.5pt; color: #666; }
+        .header .numero { font-size: 11pt; color: #2563eb; font-weight: bold; margin-top: 3px; }
+        .recibo-box { border: 2px solid #1a2332; padding: 10px; text-align: center; margin: 8px 0; border-radius: 5px; }
+        .recibo-box .valor { font-size: 14pt; color: #2563eb; font-weight: bold; margin: 4px 0; }
+        .info { margin: 6px 0; }
+        .info table { width: 100%; }
+        .info td { padding: 2px 6px; font-size: 9pt; }
+        .info .label { font-weight: bold; color: #666; width: 140px; }
+        .footer { margin-top: 12px; text-align: center; font-size: 7pt; color: #999; border-top: 1px solid #ddd; padding-top: 6px; }
+        .assinatura { margin-top: 16px; }
+        .assinatura .line { width: 200px; border-top: 1px solid #333; margin: 20px 0 3px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LamoProjectos</h1>
+        <div class="subtitle">Projectos Arquitectónicos Sob Medida</div>
+        <div class="numero">RECIBO DE PAGAMENTO</div>
+    </div>
+
+    <p style="text-align:right;font-size:9pt;"><strong>Recibo Nº:</strong> {{ pagamento.cotacao.numero }}-{{ pagamento.prestacao }}<br>
+    <strong>Data:</strong> {{ data_hoje|date:'d/m/Y' }}</p>
+
+    <div class="recibo-box">
+        <p style="font-size:10pt;margin:0;">Recebemos o valor de</p>
+        <div class="valor">{{ pagamento.valor|floatformat:2 }} MZN</div>
+        <p style="font-size:8.5pt;color:#666;margin:3px 0;">
+            {% if pagamento.valor >= 1000000 %}{{ pagamento.valor|stringformat:".0f" }} meticais{% else %}{{ pagamento.valor|floatformat:2 }} meticais{% endif %}
+        </p>
+        <p style="margin-top:6px;font-size:9pt;">correspondente ao pagamento da <strong>{{ pagamento.prestacao }}ª prestação</strong><br>
+        referente à elaboração do projecto arquitectónico.</p>
+        {% with pendente=pagamento.cotacao.saldo_pendente %}
+        <p style="margin-top:6px;font-size:9pt;border-top:1px dashed #ddd;padding-top:6px;"><strong>Saldo em aberto:</strong> {{ pendente|floatformat:2 }} MZN</p>
+        {% endwith %}
+    </div>
+
+    <div class="info">
+        <table>
+            <tr><td class="label">Cliente:</td><td>{{ pagamento.cotacao.cliente.nome }}</td></tr>
+            <tr><td class="label">Cotação:</td><td>{{ pagamento.cotacao.numero }}</td></tr>
+        </table>
+    </div>
+
+    <div class="assinatura">
+        <p>Recebido por,</p>
+        {% if assinatura_path %}
+        <img src="file://{{ assinatura_path }}" alt="Assinatura" style="max-height:40px;margin:3px 0;">
+        {% else %}
+        <div class="line"></div>
+        {% endif %}
+        <p><strong>{{ config.nome_administrador|default:'Cleiton Simião Ndona' }}</strong><br>{{ config.cargo|default:'Administrador' }}</p>
+    </div>
+
+    <div class="footer">
+        LamoProjectos &bull; 83 525 2284 &bull; lamoprojetos@gmail.com
+    </div>
+</body>
+</html>

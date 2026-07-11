@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %}Relatório Mensal - Caixa{% endblock %}
+{% block page_title %}Relatório Mensal - Caixa{% endblock %}
+{% block content %}
+
+<div class="table-container">
+    <h6 class="fw-bold mb-3"><i class="bi bi-bar-chart me-2"></i>Entradas vs Saídas por Mês</h6>
+    {% if meses %}
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Mês</th>
+                    <th>Entradas</th>
+                    <th>Saídas</th>
+                    <th>Saldo do Mês</th>
+                    <th>Barra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dados in meses %}
+                <tr>
+                    <td class="fw-medium">{{ dados.mes|title }}</td>
+                    <td class="text-success fw-bold">{{ dados.entradas|floatformat:2 }} MZN</td>
+                    <td class="text-danger fw-bold">{{ dados.saidas|floatformat:2 }} MZN</td>
+                    <td class="fw-bold {% if dados.saldo < 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ dados.saldo|floatformat:2 }} MZN
+                    </td>
+                    <td style="width:200px;">
+                        <div class="d-flex align-items-center gap-1" style="height:24px;">
+                            {% with total=dados.entradas|add:dados.saidas %}
+                            {% if total > 0 %}
+                            <div style="width:{% widthratio dados.entradas total 100 %}%;background:#2e7d32;height:100%;border-radius:4px 0 0 4px;min-width:4px;" title="Entradas"></div>
+                            <div style="width:{% widthratio dados.saidas total 100 %}%;background:#c62828;height:100%;border-radius:0 4px 4px 0;min-width:4px;" title="Saídas"></div>
+                            {% endif %}
+                            {% endwith %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-bar-chart"></i>
+        <p class="mb-0">Nenhum dado disponível</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="mt-3">
+    <a href="{% url 'financial_caixa_lista' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Voltar</a>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Cliente <span class="text-danger">*</span></label>
+                        <select name="cliente" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.pk }}" {% if projeto.cliente.pk == c.pk or request.GET.cliente == c.pk|stringformat:'i' %}selected{% endif %}>{{ c.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                        <select name="tipo" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            <option value="moradia" {% if projeto.tipo == 'moradia' %}selected{% endif %}>Moradia</option>
+                            <option value="ampliacao" {% if projeto.tipo == 'ampliacao' %}selected{% endif %}>Ampliação</option>
+                            <option value="renovacao" {% if projeto.tipo == 'renovacao' %}selected{% endif %}>Renovação</option>
+                            <option value="reforma" {% if projeto.tipo == 'reforma' %}selected{% endif %}>Reforma</option>
+                            <option value="salao" {% if projeto.tipo == 'salao' %}selected{% endif %}>Salão de Eventos</option>
+                            <option value="pool" {% if projeto.tipo == 'pool' %}selected{% endif %}>Pool Familiar</option>
+                            <option value="comercial" {% if projeto.tipo == 'comercial' %}selected{% endif %}>Comercial</option>
+                            <option value="outro" {% if projeto.tipo == 'outro' %}selected{% endif %}>Outro</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Nome do Projeto <span class="text-danger">*</span></label>
+                        <input type="text" name="nome" class="form-control" value="{{ projeto.nome|default:'' }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Descrição</label>
+                        <textarea name="descricao" class="form-control" rows="3">{{ projeto.descricao|default:'' }}</textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Valor Total (MZN)</label>
+                        <input type="number" step="0.01" name="valor_total" class="form-control" value="{{ projeto.valor_total|default:'0' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Início</label>
+                        <input type="date" name="data_inicio" class="form-control" value="{{ projeto.data_inicio|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data de Entrega</label>
+                        <input type="date" name="data_entrega" class="form-control" value="{{ projeto.data_entrega|date:'Y-m-d'|default:'' }}">
+                    </div>
+                    {% if projeto %}
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="proposta" {% if projeto.status == 'proposta' %}selected{% endif %}>Proposta</option>
+                            <option value="aprovado" {% if projeto.status == 'aprovado' %}selected{% endif %}>Aprovado</option>
+                            <option value="em_andamento" {% if projeto.status == 'em_andamento' %}selected{% endif %}>Em Andamento</option>
+                            <option value="concluido" {% if projeto.status == 'concluido' %}selected{% endif %}>Concluído</option>
+                            <option value="cancelado" {% if projeto.status == 'cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+                    <a href="{% url 'projects_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

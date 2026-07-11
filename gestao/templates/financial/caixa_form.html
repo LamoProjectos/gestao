@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tipo <span class="text-danger">*</span></label>
+                        <select name="tipo" class="form-select" required id="id_tipo" onchange="toggleCategorias()">
+                            <option value="">Selecione...</option>
+                            <option value="entrada" {% if movimento.tipo == 'entrada' %}selected{% endif %}>Entrada</option>
+                            <option value="saida" {% if movimento.tipo == 'saida' %}selected{% endif %}>Saída</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Categoria <span class="text-danger">*</span></label>
+                        <select name="categoria" class="form-select" required>
+                            <option value="">Selecione...</option>
+                            {% for key, val in categorias_caixa %}<option value="{{ key }}" {% if movimento.categoria == key %}selected{% endif %} data-tipo="{% if 'entrada' in key %}entrada{% else %}saida{% endif %}">{{ val }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Valor (MZN) <span class="text-danger">*</span></label>
+                        <input type="number" step="0.01" name="valor" class="form-control" value="{{ movimento.valor|default:'' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data <span class="text-danger">*</span></label>
+                        <input type="date" name="data" class="form-control" value="{{ movimento.data|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Forma de Pagamento</label>
+                        <select name="forma_pagamento" class="form-select">
+                            <option value="">Selecione...</option>
+                            {% for key, val in formas_pagamento %}<option value="{{ key }}" {% if movimento.forma_pagamento == key %}selected{% endif %}>{{ val }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Descrição <span class="text-danger">*</span></label>
+                        <textarea name="descricao" class="form-control" rows="3" required>{{ movimento.descricao|default:'' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Cliente (opcional)</label>
+                        <select name="cliente" class="form-select">
+                            <option value="">Nenhum</option>
+                            {% for c in clientes %}
+                            <option value="{{ c.pk }}" {% if movimento.cliente.pk == c.pk %}selected{% endif %}>{{ c.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Cotação (opcional)</label>
+                        <select name="cotacao" class="form-select">
+                            <option value="">Nenhuma</option>
+                            {% for c in cotacoes %}
+                            <option value="{{ c.pk }}" {% if movimento.cotacao.pk == c.pk %}selected{% endif %}>{{ c.numero }} - {{ c.cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Nº Documento (opcional)</label>
+                        <input type="text" name="documento" class="form-control" value="{{ movimento.documento|default:'' }}" placeholder="Nº de recibo, transferência, etc.">
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+                    <a href="{% url 'financial_caixa_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 1.2cm 1.5cm; size: A4; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 9.5pt; color: #333; line-height: 1.4; }
+        .header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #2563eb; padding-bottom: 8px; }
+        .header h1 { font-size: 16pt; color: #1a2332; margin: 0 0 2px 0; }
+        .header .subtitle { font-size: 8pt; color: #666; }
+        .header .numero { font-size: 12pt; color: #2563eb; font-weight: bold; margin-top: 4px; }
+        .section { margin-bottom: 10px; }
+        .section h3 { font-size: 10pt; color: #1a2332; border-bottom: 1px solid #ddd; padding-bottom: 3px; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 9pt; }
+        table th, table td { padding: 5px 8px; text-align: left; }
+        table th { background: #1a2332; color: #fff; font-size: 8pt; }
+        table td { border-bottom: 1px solid #eee; }
+        table .total-row { font-weight: bold; background: #f8f9fa; }
+        .info-grid { width: 100%; }
+        .info-grid td { padding: 2px 8px; border: none; vertical-align: top; font-size: 9pt; }
+        .info-grid .label { font-weight: bold; color: #666; width: 120px; }
+        .terms { font-size: 8pt; color: #555; margin-top: 8px; padding: 8px; background: #f9f9f9; border-radius: 4px; }
+        .terms ol { padding-left: 16px; margin: 4px 0; }
+        .terms li { margin-bottom: 2px; }
+        .footer { margin-top: 12px; padding-top: 6px; border-top: 1px solid #ddd; text-align: center; font-size: 7pt; color: #999; }
+        .assinatura { margin-top: 16px; }
+        .assinatura .line { width: 220px; border-top: 1px solid #333; margin: 6px 0 3px 0; }
+        ul { margin: 4px 0; padding-left: 18px; font-size: 9pt; }
+        ul li { margin-bottom: 1px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LamoProjectos</h1>
+        <div class="subtitle">Projectos Arquitectónicos Sob Medida</div>
+        <div class="numero">COTAÇÃO Nº {{ cotacao.numero }}</div>
+        <div class="subtitle">Data de Emissão: {{ data_hoje|date:'d/m/Y' }}</div>
+    </div>
+
+    <div class="section">
+        <h3>Dados do Cliente</h3>
+        <table class="info-grid">
+            <tr><td class="label">Cliente:</td><td>{{ cotacao.cliente.nome }}</td></tr>
+            <tr><td class="label">Contacto:</td><td>{{ cotacao.cliente.telefone|default:'—' }}</td></tr>
+            <tr><td class="label">E-mail:</td><td>{{ cotacao.cliente.email|default:'—' }}</td></tr>
+            <tr><td class="label">Endereço:</td><td>{{ cotacao.cliente.endereco|default:'—' }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Objeto da Cotação</h3>
+        <p style="font-size:9pt;margin:0 0 3px 0;">Prestação de serviços para elaboração do projeto arquitectónico, incluindo:</p>
+        <ul>
+            <li>Estudo preliminar e proposta arquitectónica;</li>
+            <li>Ajustes e revisões solicitadas pelo cliente;</li>
+            <li>Desenvolvimento do projecto técnico final;</li>
+            <li>Entrega de toda a documentação necessária.</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>Valor Global do Projecto</h3>
+        <table>
+            <tr><th>Descrição</th><th style="text-align:right;">Valor (MZN)</th></tr>
+            <tr><td>Elaboração do projecto arquitectónico completo</td><td style="text-align:right;">{{ cotacao.valor_total|floatformat:2 }}</td></tr>
+            <tr class="total-row"><td>Total Geral</td><td style="text-align:right;">{{ cotacao.valor_total|floatformat:2 }} MZN</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Condições de Pagamento</h3>
+        <table>
+            <tr><th>Prestação</th><th>Percentual</th><th style="text-align:right;">Valor (MZN)</th><th>Condição</th></tr>
+            {% for p in pagamentos %}
+            <tr>
+                <td>{{ p.prestacao }}ª Prestação</td>
+                <td>{% widthratio p.valor cotacao.valor_total 100 %}%</td>
+                <td style="text-align:right;">{{ p.valor|floatformat:2 }}</td>
+                <td>{% if p.prestacao == 1 %}Após aprovação da proposta{% else %}Antes da entrega final{% endif %}</td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="2">Total</td>
+                <td style="text-align:right;">{{ cotacao.valor_total|floatformat:2 }} MZN</td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Termos e Condições</h3>
+        <div class="terms">
+            <ol>
+                <li>A aceitação pode ser confirmada por assinatura ou resposta por e-mail/WhatsApp.</li>
+                <li>O desenvolvimento inicia após confirmação do pagamento da primeira prestação.</li>
+                <li>A entrega final será efectuada apenas após o pagamento integral.</li>
+                <li>Alterações fora do escopo inicialmente acordado poderão gerar custos adicionais.</li>
+                <li>Os prazos estão sujeitos ao cumprimento das datas de pagamento e ao tempo de resposta do cliente.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="assinatura">
+        <p style="font-size:9pt;">Atenciosamente,</p>
+        {% if assinatura_path %}
+        <img src="file://{{ assinatura_path }}" alt="Assinatura" style="max-height:40px;margin:4px 0;">
+        {% else %}
+        <div class="line"></div>
+        {% endif %}
+        <p><strong>{{ config.nome_administrador|default:'Cleiton Simião Ndona' }}</strong><br>{{ config.cargo|default:'Administrador' }}</p>
+    </div>
+
+    <div class="footer">
+        LamoProjectos &bull; 83 525 2284 &bull; lamoprojetos@gmail.com &bull; Documento gerado em {{ data_hoje|date:'d/m/Y' }}
+    </div>
+</body>
+</html>

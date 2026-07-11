@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Nome <span class="text-danger">*</span></label>
+                        <input type="text" name="nome" class="form-control" value="{{ cliente.nome|default:'' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">NUIT</label>
+                        <input type="text" name="nuit" class="form-control" value="{{ cliente.nuit|default:'' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Telefone</label>
+                        <input type="text" name="telefone" class="form-control" value="{{ cliente.telefone|default:'' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" value="{{ cliente.email|default:'' }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Endereço</label>
+                        <textarea name="endereco" class="form-control" rows="2">{{ cliente.endereco|default:'' }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Observações</label>
+                        <textarea name="observacoes" class="form-control" rows="3">{{ cliente.observacoes|default:'' }}</textarea>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+                    <a href="{% url 'crm_lista' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

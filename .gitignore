@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+*.sqlite3
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large project files (architecture plans)
+*.7z
+*.zip
+*.docx
+*.pdf
+Conversa no WhatsApp com +258 84 763 8748/
+Conversa no WhatsApp com +258 84 763 8748.zip
+POOL FAMILIA - GUAVA/
+POOL FAMILIA - GUAVA.7z
+SALÃO DE EVENTOS - MUHALAZE/
+SALÃO DE EVENTOS - MUHALAZE.7z
+TIPO 03 AMPLIAÇÃO - GUAVA (2 PISOS)/
+TIPO 03 AMPLIAÇÃO - GUAVA (2 PISOS).7z
+TIPO 03 REFORMA - MATLEMELE/
+TIPO 03 REFORMA - MATLEMELE.7z
+TIPO 03 RENOVAÇÃO - 2ª ROTUNDA/
+TIPO 03 RENOVAÇÃO - 2ª ROTUNDA.7z
+TIPO 04 AMPLIAÇÃO - GUAVA/
+TIPO 04 AMPLIAÇÃO - GUAVA.7z
+TIPO 05 MORADIA - KATEMBE/
+TIPO 05 MORADIA - KATEMBE.7z
+MD.docx
+MD (1).docx
+Projeto V2_Manuel Chimututo.pdf

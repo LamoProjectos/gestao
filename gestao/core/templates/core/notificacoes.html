@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notificações{% endblock %}
+{% block page_title %}🔔 Centro de Notificações{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">{{ notificacoes.count }} notificação{{ notificacoes.count|pluralize:"ões" }}</span>
+    {% if notificacoes %}
+    <a href="{% url 'core:marcar_lidas' %}" class="btn btn-sm btn-accent">
+        <i class="bi bi-check-all me-1"></i>Marcar todas como lidas
+    </a>
+    {% endif %}
+</div>
+
+<div class="table-container">
+    {% if notificacoes %}
+        {% for n in notificacoes %}
+        <a href="{{ n.url|default:'#' }}" class="text-decoration-none">
+            <div class="card notification-card mb-2 {% if not n.lida %}notification-unread{% endif %}">
+                <div class="card-body py-3 px-4">
+                    <div class="d-flex align-items-start gap-3">
+                        <span class="notification-icon notification-{{ n.tipo }}">
+                            {% if n.tipo == 'info' %}<i class="bi bi-info-circle"></i>
+                            {% elif n.tipo == 'warning' %}<i class="bi bi-exclamation-triangle"></i>
+                            {% elif n.tipo == 'danger' %}<i class="bi bi-x-circle"></i>
+                            {% else %}<i class="bi bi-check-circle"></i>{% endif %}
+                        </span>
+                        <div class="flex-grow-1">
+                            <p class="mb-1">{{ n.mensagem }}</p>
+                            <small class="text-muted">{{ n.criado_em|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        {% if not n.lida %}
+                            <span class="badge bg-primary rounded-pill">Nova</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <i class="bi bi-bell-slash"></i>
+            <p>Nenhuma notificação.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

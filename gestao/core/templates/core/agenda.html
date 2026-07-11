@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static core_extras %}
+{% block title %}Agenda{% endblock %}
+{% block page_title %}📅 Agenda / Cronograma{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <span class="fw-semibold me-2">Filtrar:</span>
+            <a href="{% url 'core:agenda' %}" class="btn btn-sm btn-outline-accent {% if not filtro_tipo and not filtro_mes %}active{% endif %}">Todas</a>
+            <a href="{% url 'core:agenda' %}?tipo=etapa" class="btn btn-sm btn-outline-accent {% if filtro_tipo == 'etapa' %}active{% endif %}">Etapas</a>
+            <a href="{% url 'core:agenda' %}?tipo=pagamento" class="btn btn-sm btn-outline-accent {% if filtro_tipo == 'pagamento' %}active{% endif %}">Pagamentos</a>
+            <a href="{% url 'core:agenda' %}?tipo=marco" class="btn btn-sm btn-outline-accent {% if filtro_tipo == 'marco' %}active{% endif %}">Marcos</a>
+            <div class="vr mx-2"></div>
+            <a href="{% url 'core:agenda' %}" class="btn btn-sm btn-outline-accent {% if not filtro_mes %}active{% endif %}">Todos</a>
+            <a href="{% url 'core:agenda' %}?mes=1" class="btn btn-sm btn-outline-accent {% if filtro_mes == '1' %}active{% endif %}">Este Mês</a>
+            <a href="{% url 'core:agenda' %}?mes=3" class="btn btn-sm btn-outline-accent {% if filtro_mes == '3' %}active{% endif %}">Próximos 3M</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-container">
+    {% if datas_ordenadas %}
+        <div class="timeline">
+            {% for data in datas_ordenadas %}
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <span class="timeline-date-badge">{{ data|date:"d" }}<small>{{ data|date:"M" }}</small></span>
+                    </div>
+                    <div class="timeline-content">
+                        <h6 class="timeline-date-header text-muted mb-2">{{ data|date:"l, d F Y" }}</h6>
+                        {% for ev in eventos_por_data|get_item:data %}
+                            {% if not filtro_tipo or ev.tipo == filtro_tipo %}
+                            <a href="{{ ev.url }}" class="text-decoration-none">
+                                <div class="card event-card event-{{ ev.cor }} mb-2">
+                                    <div class="card-body py-2 px-3 d-flex align-items-center gap-3">
+                                        <span class="event-icon">
+                                            {% if ev.tipo == 'etapa' %}
+                                                <i class="bi bi-tools"></i>
+                                            {% elif ev.tipo == 'pagamento' %}
+                                                <i class="bi bi-cash-coin"></i>
+                                            {% else %}
+                                                <i class="bi bi-flag"></i>
+                                            {% endif %}
+                                        </span>
+                                        <div class="flex-grow-1">
+                                            <strong>{{ ev.titulo }}</strong>
+                                            <br><small class="text-muted">{{ ev.descricao }}</small>
+                                        </div>
+                                        {% if ev.concluido %}
+                                            <span class="badge bg-success">Concluído</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </a>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="bi bi-calendar-check"></i>
+            <p>Nenhum evento encontrado.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

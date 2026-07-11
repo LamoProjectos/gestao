@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page { margin: 1.2cm 1.5cm; size: A4; }
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 9.5pt; color: #333; line-height: 1.4; }
+        .header { text-align: center; margin-bottom: 12px; border-bottom: 2px solid #2563eb; padding-bottom: 6px; }
+        .header h1 { font-size: 16pt; color: #1a2332; margin: 0; }
+        .section { margin-bottom: 10px; }
+        .section h3 { font-size: 10pt; color: #1a2332; border-bottom: 1px solid #ddd; padding-bottom: 3px; margin-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-size: 9pt; }
+        table th, table td { padding: 5px 8px; text-align: left; border: 1px solid #ddd; }
+        table th { background: #1a2332; color: #fff; font-size: 8pt; }
+        .info-grid td { padding: 2px 8px; border: none; vertical-align: top; font-size: 9pt; }
+        .info-grid .label { font-weight: bold; color: #666; width: 140px; }
+        .terms { font-size: 8.5pt; color: #555; margin-top: 6px; }
+        .terms li { margin-bottom: 3px; }
+        .footer { margin-top: 15px; text-align: center; font-size: 7pt; color: #999; border-top: 1px solid #ddd; padding-top: 6px; }
+        .assinatura { margin-top: 20px; }
+        .assinatura .line { width: 220px; border-top: 1px solid #333; margin: 25px 0 3px 0; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>LamoProjectos</h1>
+        <p style="font-size:8pt;color:#666;">Projectos Arquitectónicos Sob Medida</p>
+        <p style="font-size:10pt;color:#2563eb;font-weight:bold;margin:2px 0 0 0;">Contrato de Prestação de Serviços</p>
+    </div>
+
+    <p style="text-align:right;font-size:9pt;">Data: {{ data_hoje|date:'d/m/Y' }}</p>
+
+    <div class="section">
+        <h3>Partes Contratantes</h3>
+        <table class="info-grid">
+            <tr><td class="label">Contratada:</td><td>LamoProjectos, representada por {{ config.nome_administrador|default:'Cleiton Simião Ndona' }}</td></tr>
+            <tr><td class="label">Contacto:</td><td>83 525 2284 | lamoprojetos@gmail.com</td></tr>
+            <tr><td class="label" style="padding-top:8px;">Contratante:</td><td style="padding-top:8px;">{{ projeto.cliente.nome }}</td></tr>
+            <tr><td class="label">Contacto:</td><td>{{ projeto.cliente.telefone|default:'—' }} | {{ projeto.cliente.email|default:'—' }}</td></tr>
+            <tr><td class="label">Endereço:</td><td>{{ projeto.cliente.endereco|default:'—' }}</td></tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Objecto do Contrato</h3>
+        <p>A Contratada compromete-se a elaborar o projecto arquitectónico denominado <strong>"{{ projeto.nome }}"</strong>, do tipo <strong>{{ projeto.get_tipo_display }}</strong>.</p>
+        {% if projeto.descricao %}
+        <p><strong>Descrição:</strong> {{ projeto.descricao }}</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h3>Valor e Condições de Pagamento</h3>
+        <p><strong>Valor Total:</strong> {{ projeto.valor_total|floatformat:2 }} MZN &mdash; em 2 prestações conforme cotação.</p>
+    </div>
+
+    <div class="section">
+        <h3>Prazo de Execução</h3>
+        <table>
+            <tr><th>Evento</th><th>Data</th></tr>
+            {% if projeto.data_inicio %}
+            <tr><td>Início previsto</td><td>{{ projeto.data_inicio|date:'d/m/Y' }}</td></tr>
+            {% endif %}
+            {% if projeto.data_entrega %}
+            <tr><td>Entrega prevista</td><td>{{ projeto.data_entrega|date:'d/m/Y' }}</td></tr>
+            {% endif %}
+        </table>
+    </div>
+
+    <div class="section">
+        <h3>Cláusulas Gerais</h3>
+        <div class="terms">
+            <ol>
+                <li>A Contratada obriga-se a executar os serviços com diligência e conforme as boas práticas da arquitectura.</li>
+                <li>O Contratante obriga-se a fornecer todas as informações necessárias e a efectuar os pagamentos nas datas acordadas.</li>
+                <li>Alterações após a aprovação do projecto poderão implicar custos adicionais.</li>
+                <li>O presente contrato entra em vigor na data da sua assinatura.</li>
+                <li>Qualquer das partes pode rescindir o contrato mediante aviso prévio de 5 dias úteis, ficando o Contratante responsável pelos serviços já prestados.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="assinatura">
+        <table style="border:none;font-size:9pt;">
+            <tr>
+                <td style="border:none;width:50%;text-align:center;">
+                    <div style="margin:0 auto;width:200px;border-top:1px solid #333;margin-bottom:3px;"></div>
+                    <p><strong>{{ config.nome_administrador|default:'Cleiton Simião Ndona' }}</strong><br>{{ config.cargo|default:'Administrador' }}</p>
+                    {% if assinatura_path %}
+                    <img src="file://{{ assinatura_path }}" alt="Assinatura" style="max-height:35px;margin-top:3px;">
+                    {% else %}
+                    <p style="font-size:8pt;color:#666;">Assinatura: _________________</p>
+                    {% endif %}
+                </td>
+                <td style="border:none;width:50%;text-align:center;">
+                    <div style="margin:0 auto;width:200px;border-top:1px solid #333;margin-bottom:3px;"></div>
+                    <p><strong>{{ projeto.cliente.nome }}</strong><br>Contratante</p>
+                    <p style="font-size:8pt;color:#666;">Assinatura: _________________</p>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        LamoProjectos &bull; 83 525 2284 &bull; lamoprojetos@gmail.com
+    </div>
+</body>
+</html>

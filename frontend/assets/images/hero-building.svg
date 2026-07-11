@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 450" fill="none">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="building1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="building2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky background -->
+  <rect width="500" height="450" fill="url(#sky)"/>
+
+  <!-- Sun / Circle -->
+  <circle cx="400" cy="80" r="45" fill="#3b82f6" opacity="0.15"/>
+  <circle cx="400" cy="80" r="30" fill="#60a5fa" opacity="0.2"/>
+  <circle cx="400" cy="80" r="15" fill="#93c5fd" opacity="0.3"/>
+
+  <!-- Ground -->
+  <rect x="0" y="350" width="500" height="100" fill="url(#ground)"/>
+  <rect x="0" y="345" width="500" height="8" fill="#2563eb" opacity="0.5" rx="4"/>
+
+  <!-- Building 1 - Main (left) -->
+  <rect x="40" y="140" width="160" height="210" rx="4" fill="url(#building1)" opacity="0.95"/>
+  <rect x="40" y="140" width="160" height="210" rx="4" stroke="#3b82f6" stroke-width="1" opacity="0.3"/>
+
+  <!-- Building 1 - Top section -->
+  <rect x="35" y="135" width="170" height="12" rx="3" fill="#1d4ed8"/>
+  <rect x="55" y="125" width="130" height="14" rx="2" fill="#2563eb" opacity="0.8"/>
+
+  <!-- Building 1 - Windows -->
+  <rect x="60" y="160" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="100" y="160" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="140" y="160" width="28" height="36" rx="2" fill="url(#glass)"/>
+
+  <rect x="60" y="210" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="100" y="210" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="140" y="210" width="28" height="36" rx="2" fill="url(#glass)"/>
+
+  <rect x="60" y="260" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="100" y="260" width="28" height="36" rx="2" fill="url(#glass)"/>
+  <rect x="140" y="260" width="28" height="36" rx="2" fill="url(#glass)"/>
+
+  <!-- Building 1 - Door -->
+  <rect x="80" y="310" width="40" height="40" rx="3" fill="#1e293b"/>
+  <circle cx="112" cy="332" r="3" fill="#3b82f6"/>
+
+  <!-- Building 2 - Right (taller) -->
+  <rect x="250" y="100" width="130" height="250" rx="4" fill="url(#building2)" opacity="0.9"/>
+  <rect x="250" y="100" width="130" height="250" rx="4" stroke="#60a5fa" stroke-width="1" opacity="0.2"/>
+
+  <!-- Building 2 - Top -->
+  <rect x="245" y="95" width="140" height="12" rx="3" fill="#2563eb"/>
+  <rect x="260" y="85" width="110" height="14" rx="2" fill="#3b82f6" opacity="0.7"/>
+
+  <!-- Building 2 - Vertical strip windows -->
+  <rect x="270" y="120" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="300" y="120" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="340" y="120" width="20" height="50" rx="2" fill="url(#glass)"/>
+
+  <rect x="270" y="180" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="300" y="180" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="340" y="180" width="20" height="50" rx="2" fill="url(#glass)"/>
+
+  <rect x="270" y="240" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="300" y="240" width="20" height="50" rx="2" fill="url(#glass)"/>
+  <rect x="340" y="240" width="20" height="50" rx="2" fill="url(#glass)"/>
+
+  <!-- Building 2 - Entrance -->
+  <rect x="290" y="310" width="45" height="40" rx="3" fill="#1e293b"/>
+  <circle cx="328" cy="332" r="3" fill="#3b82f6"/>
+
+  <!-- Small building left -->
+  <rect x="200" y="250" width="60" height="100" rx="3" fill="#1d4ed8" opacity="0.8"/>
+  <rect x="210" y="265" width="15" height="25" rx="1" fill="url(#glass)"/>
+  <rect x="235" y="265" width="15" height="25" rx="1" fill="url(#glass)"/>
+  <rect x="210" y="300" width="40" height="50" rx="2" fill="#1e293b"/>
+
+  <!-- Decorative elements - Trees -->
+  <circle cx="30" cy="310" r="25" fill="#1e293b" opacity="0.5"/>
+  <rect x="28" y="310" width="4" height="40" fill="#1e293b" opacity="0.4"/>
+
+  <circle cx="470" cy="280" r="20" fill="#1e293b" opacity="0.4"/>
+  <rect x="468" y="280" width="4" height="70" fill="#1e293b" opacity="0.3"/>
+
+  <!-- Floating dots -->
+  <circle cx="80" cy="100" r="3" fill="#93c5fd" opacity="0.4"/>
+  <circle cx="320" cy="60" r="2" fill="#93c5fd" opacity="0.3"/>
+  <circle cx="180" cy="80" r="4" fill="#60a5fa" opacity="0.25"/>
+  <circle cx="420" cy="160" r="2" fill="#93c5fd" opacity="0.3"/>
+
+  <!-- Window light effects -->
+  <rect x="62" y="262" width="24" height="32" rx="1" fill="#fef08a" opacity="0.15"/>
+  <rect x="272" y="242" width="16" height="46" rx="1" fill="#fef08a" opacity="0.12"/>
+  <rect x="102" y="212" width="24" height="32" rx="1" fill="#fef08a" opacity="0.1"/>
+</svg>

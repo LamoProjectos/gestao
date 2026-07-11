@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Configuração{% endblock %}
+{% block page_title %}Configuração{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-card">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Nome do Administrador</label>
+                        <input type="text" name="nome_administrador" class="form-control" value="{{ config.nome_administrador|default:'' }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Cargo</label>
+                        <input type="text" name="cargo" class="form-control" value="{{ config.cargo|default:'' }}">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Assinatura (imagem)</label>
+                        {% if config.assinatura %}
+                        <div class="mb-2">
+                            <img src="{{ config.assinatura.url }}" alt="Assinatura actual" style="max-height:80px;border:1px solid #ddd;border-radius:4px;padding:8px;">
+                            <p class="text-muted small mt-1">Assinatura actual. Faça upload para substituir.</p>
+                        </div>
+                        {% endif %}
+                        <input type="file" name="assinatura" class="form-control" accept="image/*">
+                        <div class="form-text">Formatos: PNG, JPG. Fundo transparente de preferência.</div>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+                    <a href="{% url 'dashboard:home' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
