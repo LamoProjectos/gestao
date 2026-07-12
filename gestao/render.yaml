@@ -6,7 +6,7 @@ services:
     startCommand: gunicorn gestao.wsgi:application --bind 0.0.0.0:$PORT --workers 2
     envVars:
       - key: DATABASE_URL
-        value: postgresql://postgres:akame2424.,@db.wlvlxlcepshwezgpvhep.supabase.co:5432/postgres?sslmode=require
+        value: postgresql://postgres.wlvlxlcepshwezgpvhep:akame2424.,@aws-0-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require
       - key: SECRET_KEY
         generateValue: true
       - key: DEBUG
