@@ -8,7 +8,7 @@ def admin_required(view_func):
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return redirect('login')
+            return redirect('accounts:login')
         if not request.user.is_superuser and not request.user.groups.filter(name='Admin').exists():
             messages.error(request, 'Apenas o administrador pode aceder a esta funcionalidade.')
             return redirect('dashboard:home')
@@ -21,7 +21,7 @@ def group_required(*group_names):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect('accounts:login')
             if request.user.is_superuser or request.user.groups.filter(name__in=group_names).exists():
                 return view_func(request, *args, **kwargs)
             messages.error(request, 'Não tens permissão para aceder a esta funcionalidade.')
