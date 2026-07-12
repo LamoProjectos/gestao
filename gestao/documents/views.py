@@ -32,7 +32,7 @@ def _get_config():
 
 @login_required
 def gerar_cotacao_pdf(request, pk):
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not request.user.groups.filter(name='Admin').exists():
         return HttpResponse('Acesso negado. Apenas o administrador.', status=403)
     cotacao = get_object_or_404(Quote, pk=pk)
     pagamentos = cotacao.pagamentos.all()
@@ -49,7 +49,7 @@ def gerar_cotacao_pdf(request, pk):
 
 @login_required
 def gerar_recibo_pdf(request, pk):
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not request.user.groups.filter(name='Admin').exists():
         return HttpResponse('Acesso negado. Apenas o administrador.', status=403)
     pagamento = get_object_or_404(Payment, pk=pk)
     ctx = _get_config()
@@ -65,7 +65,7 @@ def gerar_recibo_pdf(request, pk):
 
 @login_required
 def gerar_contrato_pdf(request, pk):
-    if not request.user.is_superuser:
+    if not request.user.is_superuser and not request.user.groups.filter(name='Admin').exists():
         return HttpResponse('Acesso negado. Apenas o administrador.', status=403)
     from projects.models import Project
     projeto = get_object_or_404(Project, pk=pk)

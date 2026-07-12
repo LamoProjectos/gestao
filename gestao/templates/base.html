@@ -68,9 +68,14 @@
                     </a>
                 </li>
             </ul>
-            {% if user.is_superuser %}
+            {% if is_admin %}
             <hr>
             <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{% url 'accounts:lista_utilizadores' %}" class="nav-link {% if request.resolver_match.url_name == 'lista_utilizadores' %}active{% endif %}">
+                        <i class="bi bi-person-badge me-2"></i> Utilizadores
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="{% url 'financial_config_assinatura' %}" class="nav-link {% if 'config' in request.path %}active{% endif %}">
                         <i class="bi bi-gear me-2"></i> Configuração
@@ -146,9 +151,14 @@
                     </a>
                 </li>
             </ul>
-            {% if user.is_superuser %}
+            {% if is_admin %}
             <hr>
             <ul class="nav nav-pills flex-column mb-auto">
+                <li class="nav-item">
+                    <a href="{% url 'accounts:lista_utilizadores' %}" class="nav-link {% if request.resolver_match.url_name == 'lista_utilizadores' %}active{% endif %}">
+                        <i class="bi bi-person-badge me-2"></i> Utilizadores
+                    </a>
+                </li>
                 <li class="nav-item">
                     <a href="{% url 'financial_config_assinatura' %}" class="nav-link {% if 'config' in request.path %}active{% endif %}">
                         <i class="bi bi-gear me-2"></i> Configuração

@@ -5,20 +5,13 @@ from django.utils import timezone
 from crm.models import Client
 from projects.models import Project
 from .models import Quote, Payment, CashFlow, CompanySettings, CATEGORIAS_CAIXA, FORMA_PAGAMENTO
-from .decorators import admin_required
-
-
-def _add_admin_context(request, context=None):
-    if context is None:
-        context = {}
-    context['is_admin'] = request.user.is_superuser
-    return context
+from .decorators import admin_required, add_user_context
 
 
 @login_required
 def lista_cotacoes(request):
     cotacoes = Quote.objects.all()
-    return render(request, 'financial/lista.html', _add_admin_context(request, {'cotacoes': cotacoes}))
+    return render(request, 'financial/lista.html', add_user_context(request, {'cotacoes': cotacoes}))
 
 
 @admin_required
@@ -66,7 +59,7 @@ def nova_cotacao(request):
             messages.success(request, f'Cotação {numero} criada com sucesso!')
             return redirect('financial_detalhe', pk=cotacao.pk)
 
-    return render(request, 'financial/form.html', _add_admin_context(request, {
+    return render(request, 'financial/form.html', add_user_context(request, {
         'clientes': clientes, 'projetos': projetos, 'titulo': 'Nova Cotação'
     }))
 
@@ -75,7 +68,7 @@ def nova_cotacao(request):
 def detalhe_cotacao(request, pk):
     cotacao = get_object_or_404(Quote, pk=pk)
     pagamentos = cotacao.pagamentos.all()
-    return render(request, 'financial/detalhe.html', _add_admin_context(request, {
+    return render(request, 'financial/detalhe.html', add_user_context(request, {
         'cotacao': cotacao, 'pagamentos': pagamentos
     }))
 
@@ -93,7 +86,7 @@ def editar_cotacao(request, pk):
         messages.success(request, 'Cotação atualizada com sucesso!')
         return redirect('financial_detalhe', pk=cotacao.pk)
 
-    return render(request, 'financial/form.html', _add_admin_context(request, {
+    return render(request, 'financial/form.html', add_user_context(request, {
         'cotacao': cotacao, 'clientes': clientes, 'projetos': projetos, 'titulo': 'Editar Cotação'
     }))
 
@@ -135,7 +128,7 @@ def registrar_pagamento(request, pk):
 def extrato(request):
     pagamentos = Payment.objects.all().order_by('-data_pagamento')
     total_pendente = sum(p.valor for p in pagamentos if p.status == 'pendente')
-    return render(request, 'financial/extrato.html', _add_admin_context(request, {
+    return render(request, 'financial/extrato.html', add_user_context(request, {
         'pagamentos': pagamentos, 'total_pendente': total_pendente
     }))
 
@@ -163,7 +156,7 @@ def lista_caixa(request):
     if data_fim:
         movimentos = movimentos.filter(data__lte=data_fim)
 
-    return render(request, 'financial/caixa_lista.html', _add_admin_context(request, {
+    return render(request, 'financial/caixa_lista.html', add_user_context(request, {
         'movimentos': movimentos,
         'saldo': saldo,
         'total_entradas': saldo_entradas,
@@ -201,7 +194,7 @@ def novo_movimento(request):
         messages.success(request, 'Movimento registado com sucesso!')
         return redirect('financial_caixa_lista')
 
-    return render(request, 'financial/caixa_form.html', _add_admin_context(request, {
+    return render(request, 'financial/caixa_form.html', add_user_context(request, {
         'clientes': clientes, 'cotacoes': cotacoes, 'titulo': 'Novo Movimento',
         'categorias_caixa': CATEGORIAS_CAIXA, 'formas_pagamento': FORMA_PAGAMENTO,
     }))
@@ -226,7 +219,7 @@ def editar_movimento(request, pk):
         messages.success(request, 'Movimento atualizado com sucesso!')
         return redirect('financial_caixa_lista')
 
-    return render(request, 'financial/caixa_form.html', _add_admin_context(request, {
+    return render(request, 'financial/caixa_form.html', add_user_context(request, {
         'movimento': movimento, 'clientes': clientes, 'cotacoes': cotacoes, 'titulo': 'Editar Movimento',
         'categorias_caixa': CATEGORIAS_CAIXA, 'formas_pagamento': FORMA_PAGAMENTO,
     }))
@@ -263,7 +256,7 @@ def extrato_caixa(request):
     total_saidas = sum(m.valor for m in movimentos if m.tipo == 'saida')
     saldo_final = total_entradas - total_saidas
 
-    return render(request, 'financial/caixa_extrato.html', _add_admin_context(request, {
+    return render(request, 'financial/caixa_extrato.html', add_user_context(request, {
         'linhas': linhas,
         'total_entradas': total_entradas,
         'total_saidas': total_saidas,
@@ -296,7 +289,7 @@ def relatorio_caixa(request):
             'saldo': dados['entradas'] - dados['saidas'],
         })
 
-    return render(request, 'financial/caixa_relatorio.html', _add_admin_context(request, {
+    return render(request, 'financial/caixa_relatorio.html', add_user_context(request, {
         'meses': meses_com_saldo,
     }))
 

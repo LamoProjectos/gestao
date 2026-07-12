@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}Utilizadores{% endblock %}
+{% block page_title %}Utilizadores{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="text-muted">{{ utilizadores|length }} utilizador{{ utilizadores|length|pluralize:'es' }}</span>
+    </div>
+    <a href="{% url 'accounts:novo_utilizador' %}" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i> Novo Utilizador</a>
+</div>
+
+<div class="table-container">
+    {% if utilizadores %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Utilizador</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Grupos</th>
+                <th>Estado</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for u in utilizadores %}
+            <tr>
+                <td class="fw-medium">{{ u.username }}</td>
+                <td>{{ u.get_full_name|default:'-' }}</td>
+                <td>{{ u.email|default:'-' }}</td>
+                <td>
+                    {% for g in u.groups.all %}
+                    <span class="badge {% if g.name == 'Admin' %}bg-danger{% elif g.name == 'Gestor' %}bg-primary{% else %}bg-secondary{% endif %} badge-status">{{ g.name }}</span>
+                    {% empty %}
+                    <span class="text-muted">—</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if u.is_active %}
+                    <span class="badge bg-success badge-status">Ativo</span>
+                    {% else %}
+                    <span class="badge bg-danger badge-status">Inativo</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="{% url 'accounts:editar_utilizador' u.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                    {% if u.is_active %}
+                    <a href="{% url 'accounts:desativar_utilizador' u.pk %}" class="btn btn-sm btn-outline-danger" title="Desativar"><i class="bi bi-person-x"></i></a>
+                    {% else %}
+                    <a href="{% url 'accounts:reativar_utilizador' u.pk %}" class="btn btn-sm btn-outline-success" title="Reativar"><i class="bi bi-person-check"></i></a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-people"></i>
+        <p class="mb-2">Nenhum utilizador encontrado</p>
+        <a href="{% url 'accounts:novo_utilizador' %}" class="btn btn-accent">Criar Primeiro Utilizador</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
