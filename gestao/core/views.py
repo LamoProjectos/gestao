@@ -2,6 +2,8 @@ from datetime import date, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.http import JsonResponse
+from django.templatetags.static import static
 from .models import Notification, AgendaEvent
 from projects.models import Project, ProjectStage
 from financial.models import Payment
@@ -96,3 +98,28 @@ def marcar_lidas(request):
         lida=False,
     ).update(lida=True)
     return redirect('core:notificacoes')
+
+
+def manifest(request):
+    icon_192 = request.build_absolute_uri(static('images/icon-192.svg'))
+    icon_512 = request.build_absolute_uri(static('images/icon-512.svg'))
+    data = {
+        "name": "LamoProjectos",
+        "short_name": "LamoP",
+        "description": "Gestão de projectos de arquitectura e engenharia",
+        "start_url": "/",
+        "display": "standalone",
+        "background_color": "#f0f4ff",
+        "theme_color": "#0f172a",
+        "icons": [
+            {"src": icon_192, "sizes": "192x192", "type": "image/svg+xml"},
+            {"src": icon_512, "sizes": "512x512", "type": "image/svg+xml"},
+        ],
+        "categories": ["business", "productivity"],
+        "lang": "pt",
+    }
+    return JsonResponse(data)
+
+
+def service_worker(request):
+    return render(request, 'sw.js', content_type='application/javascript')

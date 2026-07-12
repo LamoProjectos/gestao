@@ -7,4 +7,5 @@ urlpatterns = [
     path('agenda/', views.agenda, name='agenda'),
     path('notificacoes/', views.notificacoes, name='notificacoes'),
     path('notificacoes/marcar-lidas/', views.marcar_lidas, name='marcar_lidas'),
+    path('manifest.json', views.manifest, name='manifest'),
 ]
