@@ -15,7 +15,7 @@
                 <th>Projeto</th>
                 <th>Cliente</th>
                 <th>Tipo</th>
-                <th>Valor</th>
+                <th>Progresso</th>
                 <th>Status</th>
                 <th class="text-end">Ações</th>
             </tr>
@@ -26,7 +26,18 @@
                 <td class="fw-medium">{{ p.nome }}</td>
                 <td>{{ p.cliente.nome }}</td>
                 <td><span class="badge bg-secondary badge-status">{{ p.get_tipo_display }}</span></td>
-                <td>{{ p.valor_total|floatformat:2 }} MZN</td>
+                <td style="min-width:140px;">
+                    {% if p.total_etapas > 0 %}
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress flex-grow-1" style="height:6px;">
+                            <div class="progress-bar bg-{{ p.progresso_cor }}" style="width:{{ p.progresso_percentual }}%"></div>
+                        </div>
+                        <small class="fw-bold text-nowrap">{{ p.etapas_concluidas }}/{{ p.total_etapas }}</small>
+                    </div>
+                    {% else %}
+                    <span class="text-muted small">—</span>
+                    {% endif %}
+                </td>
                 <td>
                     <span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% elif p.status == 'em_andamento' %}primary{% elif p.status == 'aprovado' %}info{% else %}warning{% endif %} badge-status">
                         {{ p.get_status_display }}

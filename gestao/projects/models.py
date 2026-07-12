@@ -23,6 +23,7 @@ STATUS_PROJETO = [
     ('cancelado', 'Cancelado'),
 ]
 
+
 class Project(models.Model):
     cliente = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='projetos', verbose_name='Cliente')
     nome = models.CharField('Nome do Projeto', max_length=200)
@@ -43,6 +44,33 @@ class Project(models.Model):
     def __str__(self):
         return f'{self.nome} - {self.cliente.nome}'
 
+    @property
+    def total_etapas(self):
+        return self.etapas.count()
+
+    @property
+    def etapas_concluidas(self):
+        return self.etapas.filter(concluida=True).count()
+
+    @property
+    def progresso_percentual(self):
+        total = self.total_etapas
+        if total == 0:
+            return 0
+        return int(self.etapas_concluidas / total * 100)
+
+    @property
+    def progresso_cor(self):
+        pct = self.progresso_percentual
+        if pct == 100:
+            return 'success'
+        if pct >= 50:
+            return 'primary'
+        if pct >= 25:
+            return 'warning'
+        return 'danger'
+
+
 class ProjectStage(models.Model):
     projeto = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='etapas', verbose_name='Projeto')
     ordem = models.PositiveIntegerField('Ordem')
@@ -51,6 +79,8 @@ class ProjectStage(models.Model):
     data_prevista = models.DateField('Data Prevista', null=True, blank=True)
     data_conclusao = models.DateField('Data de Conclusão', null=True, blank=True)
     concluida = models.BooleanField('Concluída', default=False)
+    cor = models.CharField('Cor', max_length=10, default='secondary',
+                            help_text='Usado na barra de progresso')
 
     class Meta:
         verbose_name = 'Etapa'
@@ -59,6 +89,41 @@ class ProjectStage(models.Model):
 
     def __str__(self):
         return f'{self.ordem}. {self.nome}'
+
+    @property
+    def status_cor(self):
+        if self.concluida:
+            return 'success'
+        if self.data_prevista:
+            hoje = date.today()
+            if self.data_prevista < hoje:
+                return 'danger'
+            if self.data_prevista <= hoje + timedelta(days=5):
+                return 'warning'
+        return 'secondary'
+
+    @property
+    def dias_restantes(self):
+        if self.data_prevista:
+            return (self.data_prevista - date.today()).days
+        return None
+
+
+class TemplateEtapa(models.Model):
+    tipo_projeto = models.CharField('Tipo de Projeto', max_length=20, choices=TIPO_PROJETO)
+    ordem = models.PositiveIntegerField('Ordem')
+    nome = models.CharField('Etapa', max_length=200)
+    descricao = models.TextField('Descrição', blank=True)
+    dias_apos_inicio = models.PositiveIntegerField('Dias após início', default=0,
+                                                     help_text='Dias após a data de início para calcular data prevista')
+
+    class Meta:
+        verbose_name = 'Etapa Padrão'
+        verbose_name_plural = 'Etapas Padrão'
+        ordering = ['tipo_projeto', 'ordem']
+
+    def __str__(self):
+        return f'{self.get_tipo_projeto_display()} - {self.ordem}. {self.nome}'
 
 
 @receiver(post_save, sender=ProjectStage)
@@ -71,7 +136,7 @@ def notificar_etapa(sender, instance, created, **kwargs):
         if instance.data_prevista <= hoje + timedelta(days=5):
             msg = f'Etapa "{instance.nome}" do projeto "{instance.projeto.nome}" prevista para {instance.data_prevista}'
             url = f'/projects/{instance.projeto.id}/'
-            admins = User.objects.filter(is_superuser=True)
-            for admin in admins:
-                if not Notification.objects.filter(mensagem=msg, user=admin, lida=False).exists():
-                    Notification.objects.create(user=admin, tipo='warning', mensagem=msg, url=url)
+            users = User.objects.filter(groups__name__in=['Admin', 'Gestor', 'Engenheiro'])
+            for u in users:
+                if not Notification.objects.filter(mensagem=msg, user=u, lida=False).exists():
+                    Notification.objects.create(user=u, tipo='warning', mensagem=msg, url=url)

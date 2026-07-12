@@ -9,4 +9,6 @@ urlpatterns = [
     path('<int:pk>/excluir/', views.excluir_projeto, name='projects_excluir'),
     path('<int:pk>/etapa/nova/', views.nova_etapa, name='projects_nova_etapa'),
     path('etapa/<int:pk>/excluir/', views.excluir_etapa, name='projects_excluir_etapa'),
+    path('etapa/<int:pk>/concluir/', views.concluir_etapa, name='projects_concluir_etapa'),
+    path('<int:pk>/importar-etapas/', views.importar_etapas_padrao, name='projects_importar_etapas'),
 ]

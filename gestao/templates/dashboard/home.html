@@ -215,7 +215,7 @@
                     <tr>
                         <th>Projeto</th>
                         <th>Cliente</th>
-                        <th>Tipo</th>
+                        <th>Progresso</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -224,7 +224,18 @@
                     <tr>
                         <td><a href="{% url 'projects_detalhe' p.pk %}" class="text-decoration-none fw-medium">{{ p.nome }}</a></td>
                         <td>{{ p.cliente.nome }}</td>
-                        <td>{{ p.get_tipo_display }}</td>
+                        <td style="min-width:120px;">
+                            {% if p.total_etapas > 0 %}
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" style="height:6px;">
+                                    <div class="progress-bar bg-{{ p.progresso_cor }}" style="width:{{ p.progresso_percentual }}%"></div>
+                                </div>
+                                <small class="fw-bold">{{ p.etapas_concluidas }}/{{ p.total_etapas }}</small>
+                            </div>
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
                         <td><span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% else %}primary{% endif %} badge-status">{{ p.get_status_display }}</span></td>
                     </tr>
                     {% endfor %}

@@ -8,6 +8,37 @@
     <a href="{% url 'projects_excluir' projeto.pk %}" class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i> Excluir</a>
 </div>
 
+{% if etapas %}
+<div class="detail-section mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0">
+            <i class="bi bi-bar-chart-steps me-2"></i>Progresso
+            <span class="badge bg-{{ projeto.progresso_cor }} badge-status ms-2">{{ projeto.progresso_percentual }}%</span>
+        </h6>
+        <small class="text-muted">{{ projeto.etapas_concluidas }} de {{ projeto.total_etapas }} etapas concluídas</small>
+    </div>
+    <div class="progress" style="height:32px;border-radius:8px;overflow:hidden;">
+        {% for e in etapas %}
+        <div class="progress-bar bg-{{ e.status_cor }}"
+             style="width:{% widthratio 1 projeto.total_etapas 100 %}%;transition:all 0.3s;{% if not forloop.last %}border-right:2px solid rgba(255,255,255,0.3);{% endif %}"
+             role="progressbar"
+             title="{{ e.ordem }}. {{ e.nome }}">
+            <small style="font-size:0.65rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;padding:0 2px;">{{ e.nome|truncatechars:12 }}</small>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+        {% for e in etapas %}
+        <small class="d-inline-flex align-items-center gap-1" style="font-size:0.7rem;">
+            <span class="d-inline-block rounded-circle" style="width:10px;height:10px;background:var(--bs-{{ e.status_cor }});"></span>
+            {{ e.ordem }}. {{ e.nome }}
+            {% if e.data_prevista %}<span class="text-muted">({{ e.data_prevista|date:"d/m" }})</span>{% endif %}
+        </small>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <div class="row g-4">
     <div class="col-md-7">
         <div class="detail-section">
@@ -52,6 +83,12 @@
         <div class="detail-section">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="fw-bold mb-0"><i class="bi bi-list-check me-2"></i>Cronograma / Etapas</h6>
+                {% if not etapas %}
+                <form method="post" action="{% url 'projects_importar_etapas' projeto.pk %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-accent"><i class="bi bi-download me-1"></i> Importar Padrão</button>
+                </form>
+                {% endif %}
             </div>
 
             <form method="post" action="{% url 'projects_nova_etapa' projeto.pk %}" class="mb-3 p-3" style="background:#f8f9fa;border-radius:12px;">
@@ -79,41 +116,62 @@
             </form>
 
             {% if etapas %}
-            <table class="table table-sm">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Etapa</th>
-                        <th>Data Prevista</th>
-                        <th>Concluída</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for e in etapas %}
-                    <tr>
-                        <td>{{ e.ordem }}</td>
-                        <td>{{ e.nome }}</td>
-                        <td>{{ e.data_prevista|date:'d/m/Y'|default:'—' }}</td>
-                        <td>
-                            {% if e.concluida %}
-                            <span class="badge bg-success badge-status"><i class="bi bi-check"></i> Sim</span>
-                            {% else %}
-                            <span class="badge bg-secondary badge-status">Não</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <form method="post" action="{% url 'projects_excluir_etapa' e.pk %}" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir etapa?')"><i class="bi bi-x"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Etapa</th>
+                            <th>Data Prevista</th>
+                            <th>Status</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in etapas %}
+                        <tr class="{% if e.concluida %}table-success{% elif e.status_cor == 'danger' %}table-danger{% elif e.status_cor == 'warning' %}table-warning{% endif %}">
+                            <td>{{ e.ordem }}</td>
+                            <td>
+                                <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:var(--bs-{{ e.status_cor }});"></span>
+                                {{ e.nome }}
+                            </td>
+                            <td>{{ e.data_prevista|date:'d/m/Y'|default:'—' }}
+                                {% if e.dias_restantes != None and not e.concluida %}
+                                <br><small class="{% if e.dias_restantes < 0 %}text-danger{% else %}text-muted{% endif %}">
+                                    {{ e.dias_restantes|stringformat:'+d' }} dias
+                                </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if e.concluida %}
+                                <span class="badge bg-success badge-status"><i class="bi bi-check"></i> Concluída</span>
+                                {% elif e.status_cor == 'danger' %}
+                                <span class="badge bg-danger badge-status"><i class="bi bi-exclamation"></i> Atrasada</span>
+                                {% elif e.status_cor == 'warning' %}
+                                <span class="badge bg-warning text-dark badge-status"><i class="bi bi-clock"></i> Próximo</span>
+                                {% else %}
+                                <span class="badge bg-secondary badge-status">Pendente</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <form method="post" action="{% url 'projects_concluir_etapa' e.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm {% if e.concluida %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if e.concluida %}Reabrir{% else %}Concluir{% endif %}">
+                                        <i class="bi {% if e.concluida %}bi-arrow-counterclockwise{% else %}bi-check-lg{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <form method="post" action="{% url 'projects_excluir_etapa' e.pk %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir etapa?')"><i class="bi bi-x"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% else %}
-            <p class="text-muted text-center mb-0 py-2">Nenhuma etapa definida. Adicione as etapas do cronograma acima.</p>
+            <p class="text-muted text-center mb-0 py-2">Nenhuma etapa definida. Adicione manualmente ou clique "Importar Padrão".</p>
             {% endif %}
         </div>
     </div>
@@ -158,6 +216,23 @@
             <div class="mb-1"><span class="text-muted">Email:</span> {{ projeto.cliente.email|default:'—' }}</div>
             <div class="mb-1"><span class="text-muted">Endereço:</span> {{ projeto.cliente.endereco|default:'—' }}</div>
         </div>
+
+        {% if projeto.total_etapas > 0 %}
+        <div class="detail-section">
+            <h6 class="fw-bold mb-3"><i class="bi bi-pie-chart me-2"></i>Resumo do Progresso</h6>
+            <div class="d-flex justify-content-between mb-1">
+                <span>Concluídas</span>
+                <span class="fw-bold text-success">{{ projeto.etapas_concluidas }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+                <span>Total</span>
+                <span class="fw-bold">{{ projeto.total_etapas }}</span>
+            </div>
+            <div class="progress mt-2" style="height:8px;border-radius:4px;">
+                <div class="progress-bar bg-{{ projeto.progresso_cor }}" style="width:{{ projeto.progresso_percentual }}%"></div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

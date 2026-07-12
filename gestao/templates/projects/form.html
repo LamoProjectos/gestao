@@ -63,6 +63,16 @@
                         </select>
                     </div>
                     {% endif %}
+                    {% if not projeto %}
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" name="importar_etapas" class="form-check-input" id="importar_etapas" checked>
+                            <label class="form-check-label" for="importar_etapas">
+                                Importar etapas padrão do cronograma para este tipo de projeto
+                            </label>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
                 <div class="mt-4 d-flex gap-2">
                     <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
