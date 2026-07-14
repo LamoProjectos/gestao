@@ -22,7 +22,7 @@ def alterar_senha(request):
             request.user.set_password(nova_senha)
             request.user.save()
             messages.success(request, 'Senha alterada com sucesso! Faça login novamente.')
-            return redirect('login')
+            return redirect('accounts:login')
 
     return render(request, 'accounts/alterar_senha.html')
 
@@ -73,12 +73,25 @@ def editar_utilizador(request, pk):
     user = get_object_or_404(User, pk=pk)
     grupos = Group.objects.all()
     if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
         user.email = request.POST.get('email', '')
         user.first_name = request.POST.get('first_name', '')
         user.is_active = request.POST.get('is_active') == 'on'
         password = request.POST.get('password', '')
         grupos_ids = request.POST.getlist('grupos')
 
+        if not username:
+            messages.error(request, 'O nome de utilizador é obrigatório.')
+            return render(request, 'accounts/form.html', add_user_context(request, {
+                'user': user, 'grupos': grupos, 'titulo': 'Editar Utilizador'
+            }))
+        if username != user.username and User.objects.filter(username=username).exists():
+            messages.error(request, 'Este nome de utilizador já existe.')
+            return render(request, 'accounts/form.html', add_user_context(request, {
+                'user': user, 'grupos': grupos, 'titulo': 'Editar Utilizador'
+            }))
+
+        user.username = username
         if password:
             if len(password) < 4:
                 messages.error(request, 'A senha deve ter pelo menos 4 caracteres.')

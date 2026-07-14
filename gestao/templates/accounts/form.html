@@ -10,7 +10,7 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Utilizador <span class="text-danger">*</span></label>
-                        <input type="text" name="username" class="form-control" value="{{ user.username|default:'' }}" {% if user %}readonly{% endif %} required>
+                        <input type="text" name="username" class="form-control" value="{{ user.username|default:'' }}" required>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Nome Completo</label>
