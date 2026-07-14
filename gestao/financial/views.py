@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+from datetime import datetime
 from crm.models import Client
 from projects.models import Project
 from .models import Quote, Payment, CashFlow, CompanySettings, CATEGORIAS_CAIXA, FORMA_PAGAMENTO
@@ -24,8 +25,10 @@ def nova_cotacao(request):
         valor_total = request.POST.get('valor_total', 0)
         percentual_1 = float(request.POST.get('percentual_1', 50))
         percentual_2 = float(request.POST.get('percentual_2', 50))
-        data_venc_1 = request.POST.get('data_venc_1', '')
-        data_venc_2 = request.POST.get('data_venc_2', '')
+        data_venc_1_str = request.POST.get('data_venc_1', '')
+        data_venc_2_str = request.POST.get('data_venc_2', '')
+        data_venc_1 = datetime.strptime(data_venc_1_str, '%Y-%m-%d').date() if data_venc_1_str else timezone.now().date()
+        data_venc_2 = datetime.strptime(data_venc_2_str, '%Y-%m-%d').date() if data_venc_2_str else timezone.now().date()
         observacoes = request.POST.get('observacoes', '')
 
         if not cliente_id or not valor_total:

@@ -126,10 +126,14 @@ class CompanySettings(models.Model):
 def notificar_pagamento(sender, instance, created, **kwargs):
     from core.models import Notification
     from django.contrib.auth.models import User
+    from datetime import datetime
 
     hoje = date.today()
     if instance.status == 'pendente' and instance.data_vencimento:
-        if instance.data_vencimento <= hoje + timedelta(days=5):
+        vencimento = instance.data_vencimento
+        if isinstance(vencimento, str):
+            vencimento = datetime.strptime(vencimento, '%Y-%m-%d').date()
+        if vencimento <= hoje + timedelta(days=5):
             msg = f'Pagamento {instance.prestacao}ª prestação de {instance.cotacao.numero} vence em {instance.data_vencimento}'
             url = f'/financial/cotacoes/{instance.cotacao.id}/'
             admins = User.objects.filter(is_superuser=True)
