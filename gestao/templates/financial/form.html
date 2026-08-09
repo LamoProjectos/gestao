@@ -30,6 +30,11 @@
                         <label class="form-label">Valor Total (MZN) <span class="text-danger">*</span></label>
                         <input type="number" step="0.01" name="valor_total" class="form-control" value="{{ cotacao.valor_total|default:'' }}" required id="id_valor_total">
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Validade da Proposta (prazo para o cliente decidir)</label>
+                        <input type="date" name="data_validade" class="form-control" value="{{ cotacao.data_validade|date:'Y-m-d' }}" id="id_data_validade">
+                        <small class="text-muted">Usada para mostrar "Faltam X dias" no dashboard.</small>
+                    </div>
 
                     {% if not cotacao %}
                     <div class="col-12">
@@ -103,6 +108,12 @@ function calcularPrestacoes() {
     document.getElementById('id_valor_p2').value = (total * p2 / 100).toFixed(2) + ' MZN';
 }
 document.getElementById('id_valor_total').addEventListener('input', calcularPrestacoes);
+const dv = document.getElementById('id_data_validade');
+if (dv && !dv.value) {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    dv.value = d.toISOString().split('T')[0];
+}
 </script>
 {% endif %}
 {% endblock %}

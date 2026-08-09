@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block page_title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="form-card">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Título <span class="text-danger">*</span></label>
+                        <input type="text" name="titulo" class="form-control" value="{{ tarefa.titulo|default:'' }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Descrição</label>
+                        <textarea name="descricao" class="form-control" rows="3">{{ tarefa.descricao|default:'' }}</textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Data <span class="text-danger">*</span></label>
+                        <input type="date" name="data" class="form-control" value="{{ tarefa.data|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Prioridade</label>
+                        <select name="prioridade" class="form-select">
+                            {% for key, val in prioridades %}
+                            <option value="{{ key }}" {% if tarefa.prioridade == key %}selected{% endif %}>{{ val }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Projeto (opcional)</label>
+                        <select name="projeto" class="form-select">
+                            <option value="">Nenhum</option>
+                            {% for p in projetos %}
+                            <option value="{{ p.pk }}" {% if tarefa.projeto.pk == p.pk %}selected{% endif %}>{{ p.nome }} - {{ p.cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% if tarefa %}
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="concluida" id="id_concluida" {% if tarefa.concluida %}checked{% endif %}>
+                            <label class="form-check-label" for="id_concluida">Concluída</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-accent"><i class="bi bi-check-lg me-1"></i> Salvar</button>
+                    <a href="{% url 'core:lista_tarefas' %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

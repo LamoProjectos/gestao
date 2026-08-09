@@ -60,6 +60,15 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Projeto (opcional)</label>
+                        <select name="projeto" class="form-select">
+                            <option value="">Nenhum</option>
+                            {% for p in projetos %}
+                            <option value="{{ p.pk }}" {% if movimento.projeto.pk == p.pk %}selected{% endif %}>{{ p.nome }} - {{ p.cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                     <div class="col-12">
                         <label class="form-label">Nº Documento (opcional)</label>
                         <input type="text" name="documento" class="form-control" value="{{ movimento.documento|default:'' }}" placeholder="Nº de recibo, transferência, etc.">

@@ -1,10 +1,11 @@
 from datetime import date, timedelta
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.templatetags.static import static
-from .models import Notification, AgendaEvent
+from .models import Notification, AgendaEvent, Tarefa, PRIORIDADE_TAREFA
+from .forms import TarefaForm
 from projects.models import Project, ProjectStage
 from financial.models import Payment
 
@@ -98,6 +99,78 @@ def marcar_lidas(request):
         lida=False,
     ).update(lida=True)
     return redirect('core:notificacoes')
+
+
+# ─── Tarefas ─────────────────────────────────────────────────────
+
+@login_required
+def lista_tarefas(request):
+    tarefas = Tarefa.objects.select_related('projeto').all()
+    filtro = request.GET.get('filtro', '')
+    if filtro == 'hoje':
+        tarefas = tarefas.filter(data=date.today())
+    elif filtro == 'pendentes':
+        tarefas = tarefas.filter(concluida=False)
+    elif filtro == 'concluidas':
+        tarefas = tarefas.filter(concluida=True)
+    elif filtro == 'atrasadas':
+        tarefas = [t for t in tarefas if t.atrasada]
+    return render(request, 'core/tarefas_lista.html', {
+        'tarefas': tarefas,
+        'filtro': filtro,
+        'prioridades': PRIORIDADE_TAREFA,
+    })
+
+
+@login_required
+def nova_tarefa(request):
+    projetos = Project.objects.all()
+    if request.method == 'POST':
+        form = TarefaForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('core:lista_tarefas')
+    else:
+        form = TarefaForm()
+    return render(request, 'core/tarefa_form.html', {
+        'projetos': projetos, 'form': form, 'titulo': 'Nova Tarefa',
+        'prioridades': PRIORIDADE_TAREFA,
+    })
+
+
+@login_required
+def editar_tarefa(request, pk):
+    tarefa = get_object_or_404(Tarefa, pk=pk)
+    projetos = Project.objects.all()
+    if request.method == 'POST':
+        form = TarefaForm(request.POST, instance=tarefa)
+        if form.is_valid():
+            form.save()
+            return redirect('core:lista_tarefas')
+    else:
+        form = TarefaForm(instance=tarefa)
+    return render(request, 'core/tarefa_form.html', {
+        'tarefa': tarefa, 'projetos': projetos, 'form': form, 'titulo': 'Editar Tarefa',
+        'prioridades': PRIORIDADE_TAREFA,
+    })
+
+
+@login_required
+def excluir_tarefa(request, pk):
+    tarefa = get_object_or_404(Tarefa, pk=pk)
+    if request.method == 'POST':
+        tarefa.delete()
+        return redirect('core:lista_tarefas')
+    return render(request, 'core/tarefa_confirmar.html', {'tarefa': tarefa})
+
+
+@login_required
+def alternar_tarefa(request, pk):
+    tarefa = get_object_or_404(Tarefa, pk=pk)
+    tarefa.concluida = not tarefa.concluida
+    tarefa.save()
+    next_url = request.GET.get('next', 'core:lista_tarefas')
+    return redirect(next_url)
 
 
 def manifest(request):

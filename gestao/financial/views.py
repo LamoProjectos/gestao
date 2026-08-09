@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
-from datetime import datetime
+from datetime import datetime, timedelta
 from crm.models import Client
 from projects.models import Project
 from .models import Quote, Payment, CashFlow, CompanySettings, CATEGORIAS_CAIXA, FORMA_PAGAMENTO
 from .decorators import admin_required, add_user_context
+from .forms import QuoteForm, PaymentForm, CashFlowForm, CompanySettingsForm
 
 
 @login_required
@@ -20,50 +21,39 @@ def nova_cotacao(request):
     clientes = Client.objects.all()
     projetos = Project.objects.all()
     if request.method == 'POST':
-        cliente_id = request.POST.get('cliente')
-        projeto_id = request.POST.get('projeto') or None
-        valor_total = request.POST.get('valor_total', 0)
-        percentual_1 = float(request.POST.get('percentual_1', 50))
-        percentual_2 = float(request.POST.get('percentual_2', 50))
-        data_venc_1_str = request.POST.get('data_venc_1', '')
-        data_venc_2_str = request.POST.get('data_venc_2', '')
-        data_venc_1 = datetime.strptime(data_venc_1_str, '%Y-%m-%d').date() if data_venc_1_str else timezone.now().date()
-        data_venc_2 = datetime.strptime(data_venc_2_str, '%Y-%m-%d').date() if data_venc_2_str else timezone.now().date()
-        observacoes = request.POST.get('observacoes', '')
-
-        if not cliente_id or not valor_total:
-            messages.error(request, 'Preencha os campos obrigatórios.')
-        else:
-            valor_total = float(valor_total)
-            valor_1 = round(valor_total * percentual_1 / 100, 2)
-            valor_2 = round(valor_total * percentual_2 / 100, 2)
+        form = QuoteForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            valor_total = data['valor_total']
+            valor_1 = round(valor_total * (data['percentual_1'] or 0) / 100, 2)
+            valor_2 = round(valor_total * (data['percentual_2'] or 0) / 100, 2)
 
             ultimo_numero = Quote.objects.count() + 1
             ano = timezone.now().year
             numero = f'LP-{ano}-{ultimo_numero:03d}'
 
             cotacao = Quote.objects.create(
-                cliente_id=cliente_id, projeto_id=projeto_id,
+                cliente=data['cliente'], projeto=data['projeto'],
                 numero=numero, valor_total=valor_total,
                 valor_primeira_prestacao=valor_1,
                 valor_segunda_prestacao=valor_2,
-                observacoes=observacoes
+                data_validade=data['data_validade'],
+                observacoes=data['observacoes']
             )
 
-            Payment.objects.create(
-                cotacao=cotacao, prestacao=1, valor=valor_1,
-                data_vencimento=data_venc_1 or timezone.now().date()
-            )
-            Payment.objects.create(
-                cotacao=cotacao, prestacao=2, valor=valor_2,
-                data_vencimento=data_venc_2 or timezone.now().date()
-            )
+            data_venc_1 = data['data_venc_1'] or timezone.now().date()
+            data_venc_2 = data['data_venc_2'] or timezone.now().date()
+            Payment.objects.create(cotacao=cotacao, prestacao=1, valor=valor_1, data_vencimento=data_venc_1)
+            Payment.objects.create(cotacao=cotacao, prestacao=2, valor=valor_2, data_vencimento=data_venc_2)
 
             messages.success(request, f'Cotação {numero} criada com sucesso!')
             return redirect('financial_detalhe', pk=cotacao.pk)
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = QuoteForm()
 
     return render(request, 'financial/form.html', add_user_context(request, {
-        'clientes': clientes, 'projetos': projetos, 'titulo': 'Nova Cotação'
+        'clientes': clientes, 'projetos': projetos, 'form': form, 'titulo': 'Nova Cotação'
     }))
 
 
@@ -82,15 +72,18 @@ def editar_cotacao(request, pk):
     clientes = Client.objects.all()
     projetos = Project.objects.all()
     if request.method == 'POST':
-        cotacao.valor_total = request.POST.get('valor_total', 0)
-        cotacao.status = request.POST.get('status')
-        cotacao.observacoes = request.POST.get('observacoes', '')
-        cotacao.save()
-        messages.success(request, 'Cotação atualizada com sucesso!')
-        return redirect('financial_detalhe', pk=cotacao.pk)
+        form = QuoteForm(request.POST, instance=cotacao)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cotação atualizada com sucesso!')
+            return redirect('financial_detalhe', pk=cotacao.pk)
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = QuoteForm(instance=cotacao)
 
     return render(request, 'financial/form.html', add_user_context(request, {
-        'cotacao': cotacao, 'clientes': clientes, 'projetos': projetos, 'titulo': 'Editar Cotação'
+        'cotacao': cotacao, 'clientes': clientes, 'projetos': projetos,
+        'form': form, 'titulo': 'Editar Cotação'
     }))
 
 
@@ -108,23 +101,28 @@ def excluir_cotacao(request, pk):
 def registrar_pagamento(request, pk):
     pagamento = get_object_or_404(Payment, pk=pk)
     if request.method == 'POST':
-        data_pagamento = request.POST.get('data_pagamento')
-        metodo = request.POST.get('metodo', '')
-        pagamento.data_pagamento = data_pagamento or timezone.now().date()
-        pagamento.metodo = metodo
-        pagamento.status = 'pago'
-        pagamento.save()
+        form = PaymentForm(request.POST, instance=pagamento)
+        if form.is_valid():
+            pagamento = form.save(commit=False)
+            if not pagamento.data_pagamento:
+                pagamento.data_pagamento = timezone.now().date()
+            pagamento.status = 'pago'
+            pagamento.save()
 
-        cotacao = pagamento.cotacao
-        todos_pagos = all(p.status == 'pago' for p in cotacao.pagamentos.all())
-        if todos_pagos:
-            cotacao.status = 'aprovada'
-            cotacao.save()
+            cotacao = pagamento.cotacao
+            todos_pagos = all(p.status == 'pago' for p in cotacao.pagamentos.all())
+            if todos_pagos:
+                cotacao.status = 'aprovada'
+                cotacao.save()
 
-        messages.success(request, f'{pagamento.prestacao}ª Prestação registada como paga!')
-        return redirect('financial_detalhe', pk=pagamento.cotacao.pk)
+            messages.success(request, f'{pagamento.prestacao}ª Prestação registada como paga!')
+            return redirect('financial_detalhe', pk=pagamento.cotacao.pk)
+        messages.error(request, 'Corrija os erros do formulário.')
 
-    return render(request, 'financial/pagar.html', {'pagamento': pagamento, 'is_admin': True})
+    form = PaymentForm(instance=pagamento)
+    return render(request, 'financial/pagar.html', add_user_context(request, {
+        'pagamento': pagamento, 'form': form, 'is_admin': True
+    }))
 
 
 @login_required
@@ -176,29 +174,20 @@ def lista_caixa(request):
 def novo_movimento(request):
     clientes = Client.objects.all()
     cotacoes = Quote.objects.all()
+    projetos = Project.objects.all()
     if request.method == 'POST':
-        tipo = request.POST.get('tipo')
-        categoria = request.POST.get('categoria')
-        valor = request.POST.get('valor', 0)
-        data = request.POST.get('data', '')
-        descricao = request.POST.get('descricao', '')
-        cliente_id = request.POST.get('cliente') or None
-        cotacao_id = request.POST.get('cotacao') or None
-        forma_pagamento = request.POST.get('forma_pagamento', '')
-        documento = request.POST.get('documento', '')
-
-        CashFlow.objects.create(
-            tipo=tipo, categoria=categoria, valor=valor,
-            data=data or timezone.now().date(),
-            descricao=descricao, cliente_id=cliente_id,
-            cotacao_id=cotacao_id, forma_pagamento=forma_pagamento,
-            documento=documento
-        )
-        messages.success(request, 'Movimento registado com sucesso!')
-        return redirect('financial_caixa_lista')
+        form = CashFlowForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Movimento registado com sucesso!')
+            return redirect('financial_caixa_lista')
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = CashFlowForm()
 
     return render(request, 'financial/caixa_form.html', add_user_context(request, {
-        'clientes': clientes, 'cotacoes': cotacoes, 'titulo': 'Novo Movimento',
+        'clientes': clientes, 'cotacoes': cotacoes, 'projetos': projetos,
+        'form': form, 'titulo': 'Novo Movimento',
         'categorias_caixa': CATEGORIAS_CAIXA, 'formas_pagamento': FORMA_PAGAMENTO,
     }))
 
@@ -208,22 +197,20 @@ def editar_movimento(request, pk):
     movimento = get_object_or_404(CashFlow, pk=pk)
     clientes = Client.objects.all()
     cotacoes = Quote.objects.all()
+    projetos = Project.objects.all()
     if request.method == 'POST':
-        movimento.tipo = request.POST.get('tipo')
-        movimento.categoria = request.POST.get('categoria')
-        movimento.valor = request.POST.get('valor', 0)
-        movimento.data = request.POST.get('data', '')
-        movimento.descricao = request.POST.get('descricao', '')
-        movimento.cliente_id = request.POST.get('cliente') or None
-        movimento.cotacao_id = request.POST.get('cotacao') or None
-        movimento.forma_pagamento = request.POST.get('forma_pagamento', '')
-        movimento.documento = request.POST.get('documento', '')
-        movimento.save()
-        messages.success(request, 'Movimento atualizado com sucesso!')
-        return redirect('financial_caixa_lista')
+        form = CashFlowForm(request.POST, instance=movimento)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Movimento atualizado com sucesso!')
+            return redirect('financial_caixa_lista')
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = CashFlowForm(instance=movimento)
 
     return render(request, 'financial/caixa_form.html', add_user_context(request, {
-        'movimento': movimento, 'clientes': clientes, 'cotacoes': cotacoes, 'titulo': 'Editar Movimento',
+        'movimento': movimento, 'clientes': clientes, 'cotacoes': cotacoes, 'projetos': projetos,
+        'form': form, 'titulo': 'Editar Movimento',
         'categorias_caixa': CATEGORIAS_CAIXA, 'formas_pagamento': FORMA_PAGAMENTO,
     }))
 
@@ -303,14 +290,15 @@ def relatorio_caixa(request):
 def config_assinatura(request):
     config, _ = CompanySettings.objects.get_or_create(pk=1)
     if request.method == 'POST':
-        config.nome_administrador = request.POST.get('nome_administrador', '')
-        config.cargo = request.POST.get('cargo', '')
-        if 'assinatura' in request.FILES:
-            config.assinatura = request.FILES['assinatura']
-        config.save()
-        messages.success(request, 'Configurações atualizadas com sucesso!')
-        return redirect('financial_config_assinatura')
+        form = CompanySettingsForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Configurações atualizadas com sucesso!')
+            return redirect('financial_config_assinatura')
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = CompanySettingsForm(instance=config)
 
-    return render(request, 'financial/config_assinatura.html', {
-        'config': config, 'is_admin': True
-    })
+    return render(request, 'financial/config_assinatura.html', add_user_context(request, {
+        'config': config, 'form': form, 'is_admin': True
+    }))

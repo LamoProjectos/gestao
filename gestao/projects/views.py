@@ -4,6 +4,7 @@ from django.contrib import messages
 from datetime import date, timedelta
 from crm.models import Client
 from .models import Project, ProjectStage, TemplateEtapa
+from .forms import ProjectForm, ProjectStageForm
 from financial.decorators import add_user_context, group_required
 
 
@@ -17,26 +18,13 @@ def lista_projetos(request):
 def novo_projeto(request):
     clientes = Client.objects.all()
     if request.method == 'POST':
-        cliente_id = request.POST.get('cliente')
-        nome = request.POST.get('nome')
-        tipo = request.POST.get('tipo')
-        descricao = request.POST.get('descricao', '')
-        valor_total = request.POST.get('valor_total', 0)
-        data_inicio = request.POST.get('data_inicio', '') or None
-        data_entrega = request.POST.get('data_entrega', '') or None
-        importar_etapas = request.POST.get('importar_etapas') == 'on'
-
-        if not nome or not cliente_id:
-            messages.error(request, 'Preencha os campos obrigatórios.')
-        else:
-            projeto = Project.objects.create(
-                cliente_id=cliente_id, nome=nome, tipo=tipo,
-                descricao=descricao, valor_total=valor_total,
-                data_inicio=data_inicio, data_entrega=data_entrega
-            )
-            if importar_etapas and tipo:
+        form = ProjectForm(request.POST)
+        if form.is_valid():
+            projeto = form.save()
+            tipo = form.cleaned_data['tipo']
+            if form.cleaned_data['importar_etapas'] and tipo:
                 templates = TemplateEtapa.objects.filter(tipo_projeto=tipo).order_by('ordem')
-                data_ref = data_inicio or date.today()
+                data_ref = projeto.data_inicio or date.today()
                 for t in templates:
                     data_prev = data_ref + timedelta(days=t.dias_apos_inicio) if data_ref else None
                     ProjectStage.objects.create(
@@ -47,6 +35,7 @@ def novo_projeto(request):
             else:
                 messages.success(request, 'Projeto criado com sucesso!')
             return redirect('projects_detalhe', pk=projeto.pk)
+        messages.error(request, 'Corrija os erros do formulário.')
 
     return render(request, 'projects/form.html', add_user_context(request, {
         'clientes': clientes, 'titulo': 'Novo Projeto'
@@ -67,20 +56,17 @@ def editar_projeto(request, pk):
     projeto = get_object_or_404(Project, pk=pk)
     clientes = Client.objects.all()
     if request.method == 'POST':
-        projeto.cliente_id = request.POST.get('cliente')
-        projeto.nome = request.POST.get('nome')
-        projeto.tipo = request.POST.get('tipo')
-        projeto.status = request.POST.get('status')
-        projeto.descricao = request.POST.get('descricao', '')
-        projeto.valor_total = request.POST.get('valor_total', 0)
-        projeto.data_inicio = request.POST.get('data_inicio', '') or None
-        projeto.data_entrega = request.POST.get('data_entrega', '') or None
-        projeto.save()
-        messages.success(request, 'Projeto atualizado com sucesso!')
-        return redirect('projects_detalhe', pk=projeto.pk)
+        form = ProjectForm(request.POST, instance=projeto)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Projeto atualizado com sucesso!')
+            return redirect('projects_detalhe', pk=projeto.pk)
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = ProjectForm(instance=projeto)
 
     return render(request, 'projects/form.html', add_user_context(request, {
-        'projeto': projeto, 'clientes': clientes, 'titulo': 'Editar Projeto'
+        'projeto': projeto, 'clientes': clientes, 'form': form, 'titulo': 'Editar Projeto'
     }))
 
 
@@ -100,19 +86,14 @@ def excluir_projeto(request, pk):
 def nova_etapa(request, pk):
     projeto = get_object_or_404(Project, pk=pk)
     if request.method == 'POST':
-        ordem = request.POST.get('ordem')
-        nome = request.POST.get('nome')
-        descricao = request.POST.get('descricao', '')
-        data_prevista = request.POST.get('data_prevista', '') or None
-
-        if not nome or not ordem:
-            messages.error(request, 'Preencha os campos obrigatórios.')
-        else:
-            ProjectStage.objects.create(
-                projeto=projeto, ordem=ordem, nome=nome,
-                descricao=descricao, data_prevista=data_prevista
-            )
+        form = ProjectStageForm(request.POST)
+        if form.is_valid():
+            etapa = form.save(commit=False)
+            etapa.projeto = projeto
+            etapa.save()
             messages.success(request, 'Etapa adicionada com sucesso!')
+        else:
+            messages.error(request, 'Corrija os erros do formulário.')
 
     return redirect('projects_detalhe', pk=projeto.pk)
 

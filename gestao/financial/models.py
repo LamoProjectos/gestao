@@ -44,6 +44,8 @@ class Quote(models.Model):
     projeto = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='cotacoes', verbose_name='Projeto', null=True, blank=True)
     numero = models.CharField('Nº Cotação', max_length=20, unique=True)
     data_emissao = models.DateField('Data de Emissão', auto_now_add=True)
+    data_validade = models.DateField('Validade', null=True, blank=True,
+                                     help_text='Data limite para o cliente decidir. Usada para calcular "Faltam X dias".')
     valor_total = models.DecimalField('Valor Total (MZN)', max_digits=12, decimal_places=2)
     valor_primeira_prestacao = models.DecimalField('1ª Prestação (MZN)', max_digits=12, decimal_places=2)
     valor_segunda_prestacao = models.DecimalField('2ª Prestação (MZN)', max_digits=12, decimal_places=2)
@@ -62,6 +64,29 @@ class Quote(models.Model):
     def saldo_pendente(self):
         total_pago = sum(p.valor for p in self.pagamentos.filter(status='pago'))
         return self.valor_total - total_pago
+
+    def dias_restantes(self):
+        if not self.data_validade:
+            return None
+        if self.status in ('aprovada', 'recusada'):
+            return None
+        return (self.data_validade - date.today()).days
+
+    @property
+    def expirada(self):
+        dias = self.dias_restantes()
+        return dias is not None and dias < 0
+
+    @property
+    def urgencia_cor(self):
+        dias = self.dias_restantes()
+        if dias is None:
+            return 'secondary'
+        if dias < 0:
+            return 'danger'
+        if dias <= 7:
+            return 'danger' if dias <= 3 else 'warning'
+        return 'success'
 
 class Payment(models.Model):
     cotacao = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name='pagamentos', verbose_name='Cotação')
@@ -95,6 +120,8 @@ class CashFlow(models.Model):
     descricao = models.TextField('Descrição')
     cliente = models.ForeignKey(Client, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cliente')
     cotacao = models.ForeignKey(Quote, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='Cotação')
+    projeto = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True, blank=True, related_name='movimentos',
+                                verbose_name='Projeto')
     forma_pagamento = models.CharField('Forma de Pagamento', max_length=20, choices=FORMA_PAGAMENTO, blank=True)
     documento = models.CharField('Nº Documento', max_length=50, blank=True, help_text='Nº de recibo, transferência, etc.')
     criado_em = models.DateTimeField('Criado em', auto_now_add=True)

@@ -2,16 +2,18 @@
 # LamoProjectos - Iniciar Sistema
 echo "=== LamoProjectos ==="
 
-source "$(dirname "$0")/.venv/bin/activate"
+DIR="$(cd "$(dirname "$0")" && pwd)"
+
+source "$DIR/.venv/bin/activate"
 
 # Servidor Django (gestão)
-cd "$(dirname "$0")/gestao"
+cd "$DIR/gestao"
 echo "A iniciar gestão em http://localhost:8000"
 python manage.py runserver 0.0.0.0:8000 &
 DJANGO_PID=$!
 
 # Servidor frontend (site)
-cd "$(dirname "$0")/frontend"
+cd "$DIR/../site"
 echo "A iniciar site em http://localhost:3000"
 python -m http.server 3000 &
 FRONTEND_PID=$!

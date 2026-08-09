@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Tarefas{% endblock %}
+{% block page_title %}Tarefas{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+    <div class="btn-group btn-group-sm" role="group">
+        <a href="{% url 'core:lista_tarefas' %}" class="btn btn-outline-accent {% if not filtro %}active{% endif %}">Todas</a>
+        <a href="{% url 'core:lista_tarefas' %}?filtro=hoje" class="btn btn-outline-accent {% if filtro == 'hoje' %}active{% endif %}">Hoje</a>
+        <a href="{% url 'core:lista_tarefas' %}?filtro=pendentes" class="btn btn-outline-accent {% if filtro == 'pendentes' %}active{% endif %}">Pendentes</a>
+        <a href="{% url 'core:lista_tarefas' %}?filtro=atrasadas" class="btn btn-outline-accent {% if filtro == 'atrasadas' %}active{% endif %}">Atrasadas</a>
+        <a href="{% url 'core:lista_tarefas' %}?filtro=concluidas" class="btn btn-outline-accent {% if filtro == 'concluidas' %}active{% endif %}">Concluídas</a>
+    </div>
+    <a href="{% url 'core:nova_tarefa' %}" class="btn btn-accent"><i class="bi bi-plus-lg me-1"></i> Nova Tarefa</a>
+</div>
+
+<div class="table-container">
+    {% if tarefas %}
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead>
+                <tr>
+                    <th style="width:44px;"></th>
+                    <th>Tarefa</th>
+                    <th>Projeto</th>
+                    <th>Data</th>
+                    <th>Prioridade</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tarefas %}
+                <tr class="{% if t.concluida %}table-secondary opacity-75{% elif t.atrasada %}table-danger{% endif %}">
+                    <td>
+                        <form method="post" action="{% url 'core:alternar_tarefa' t.pk %}?next={{ request.get_full_path|urlencode }}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Concluir / Reabrir">
+                                {% if t.concluida %}
+                                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                                {% else %}
+                                <i class="bi bi-circle text-muted fs-5"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                    </td>
+                    <td>
+                        <div class="fw-semibold {% if t.concluida %}text-decoration-line-through{% endif %}">{{ t.titulo }}</div>
+                        {% if t.descricao %}<small class="text-muted">{{ t.descricao|truncatewords:10 }}</small>{% endif %}
+                    </td>
+                    <td>
+                        {% if t.projeto %}
+                        <a href="{% url 'projects_detalhe' t.projeto.pk %}" class="text-decoration-none small">{{ t.projeto.nome }}</a>
+                        {% else %}
+                        <span class="text-muted small">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {{ t.data|date:"d/m/Y" }}
+                        {% if t.atrasada %}<span class="badge bg-danger">Atrasada</span>{% endif %}
+                    </td>
+                    <td><span class="badge bg-{{ t.prioridade_cor }} badge-status">{{ t.get_prioridade_display }}</span></td>
+                    <td class="text-end">
+                        <a href="{% url 'core:editar_tarefa' t.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
+                        <form method="post" action="{% url 'core:excluir_tarefa' t.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Excluir esta tarefa?')"><i class="bi bi-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-check2-square"></i>
+        <p class="mb-0">Nenhuma tarefa encontrada</p>
+        <a href="{% url 'core:nova_tarefa' %}" class="btn btn-accent mt-2">Nova Tarefa</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

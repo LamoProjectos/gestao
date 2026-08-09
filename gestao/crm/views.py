@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Client
+from .forms import ClientForm
 
 @login_required
 def lista_clientes(request):
@@ -15,40 +16,29 @@ def lista_clientes(request):
 @login_required
 def novo_cliente(request):
     if request.method == 'POST':
-        nome = request.POST.get('nome')
-        telefone = request.POST.get('telefone', '')
-        email = request.POST.get('email', '')
-        endereco = request.POST.get('endereco', '')
-        nuit = request.POST.get('nuit', '')
-        observacoes = request.POST.get('observacoes', '')
-
-        if not nome:
-            messages.error(request, 'O nome do cliente é obrigatório.')
-        else:
-            Client.objects.create(
-                nome=nome, telefone=telefone, email=email,
-                endereco=endereco, nuit=nuit, observacoes=observacoes
-            )
+        form = ClientForm(request.POST)
+        if form.is_valid():
+            form.save()
             messages.success(request, 'Cliente cadastrado com sucesso!')
             return redirect('crm_lista')
-
-    return render(request, 'crm/form.html', {'titulo': 'Novo Cliente'})
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = ClientForm()
+    return render(request, 'crm/form.html', {'form': form, 'titulo': 'Novo Cliente'})
 
 @login_required
 def editar_cliente(request, pk):
     cliente = get_object_or_404(Client, pk=pk)
     if request.method == 'POST':
-        cliente.nome = request.POST.get('nome')
-        cliente.telefone = request.POST.get('telefone', '')
-        cliente.email = request.POST.get('email', '')
-        cliente.endereco = request.POST.get('endereco', '')
-        cliente.nuit = request.POST.get('nuit', '')
-        cliente.observacoes = request.POST.get('observacoes', '')
-        cliente.save()
-        messages.success(request, 'Cliente atualizado com sucesso!')
-        return redirect('crm_lista')
-
-    return render(request, 'crm/form.html', {'cliente': cliente, 'titulo': 'Editar Cliente'})
+        form = ClientForm(request.POST, instance=cliente)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Cliente atualizado com sucesso!')
+            return redirect('crm_lista')
+        messages.error(request, 'Corrija os erros do formulário.')
+    else:
+        form = ClientForm(instance=cliente)
+    return render(request, 'crm/form.html', {'form': form, 'cliente': cliente, 'titulo': 'Editar Cliente'})
 
 @login_required
 def excluir_cliente(request, pk):
