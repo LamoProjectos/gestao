@@ -23,10 +23,10 @@
         <tbody>
             {% for p in projetos %}
             <tr>
-                <td class="fw-medium">{{ p.nome }}</td>
-                <td>{{ p.cliente.nome }}</td>
-                <td><span class="badge bg-secondary badge-status">{{ p.get_tipo_display }}</span></td>
-                <td style="min-width:140px;">
+                <td class="fw-medium" data-label="Projeto">{{ p.nome }}</td>
+                <td data-label="Cliente">{{ p.cliente.nome }}</td>
+                <td data-label="Tipo"><span class="badge bg-secondary badge-status">{{ p.get_tipo_display }}</span></td>
+                <td data-label="Progresso" style="min-width:140px;">
                     {% if p.total_etapas > 0 %}
                     <div class="d-flex align-items-center gap-2">
                         <div class="progress flex-grow-1" style="height:6px;">
@@ -38,12 +38,12 @@
                     <span class="text-muted small">—</span>
                     {% endif %}
                 </td>
-                <td>
+                <td data-label="Status">
                     <span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% elif p.status == 'em_andamento' %}primary{% elif p.status == 'aprovado' %}info{% else %}warning{% endif %} badge-status">
                         {{ p.get_status_display }}
                     </span>
                 </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Ações">
                     <a href="{% url 'projects_detalhe' p.pk %}" class="btn btn-sm btn-outline-accent" title="Detalhes"><i class="bi bi-eye"></i></a>
                     <a href="{% url 'projects_editar' p.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
                     <a href="{% url 'projects_excluir' p.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></a>

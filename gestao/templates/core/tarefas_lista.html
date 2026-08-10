@@ -30,7 +30,7 @@
             <tbody>
                 {% for t in tarefas %}
                 <tr class="{% if t.concluida %}table-secondary opacity-75{% elif t.atrasada %}table-danger{% endif %}">
-                    <td>
+                    <td style="width:44px;">
                         <form method="post" action="{% url 'core:alternar_tarefa' t.pk %}?next={{ request.get_full_path|urlencode }}">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm p-0 border-0 bg-transparent" title="Concluir / Reabrir">
@@ -42,23 +42,23 @@
                             </button>
                         </form>
                     </td>
-                    <td>
+                    <td data-label="Tarefa">
                         <div class="fw-semibold {% if t.concluida %}text-decoration-line-through{% endif %}">{{ t.titulo }}</div>
                         {% if t.descricao %}<small class="text-muted">{{ t.descricao|truncatewords:10 }}</small>{% endif %}
                     </td>
-                    <td>
+                    <td data-label="Projeto">
                         {% if t.projeto %}
                         <a href="{% url 'projects_detalhe' t.projeto.pk %}" class="text-decoration-none small">{{ t.projeto.nome }}</a>
                         {% else %}
                         <span class="text-muted small">—</span>
                         {% endif %}
                     </td>
-                    <td>
+                    <td data-label="Data">
                         {{ t.data|date:"d/m/Y" }}
                         {% if t.atrasada %}<span class="badge bg-danger">Atrasada</span>{% endif %}
                     </td>
-                    <td><span class="badge bg-{{ t.prioridade_cor }} badge-status">{{ t.get_prioridade_display }}</span></td>
-                    <td class="text-end">
+                    <td data-label="Prioridade"><span class="badge bg-{{ t.prioridade_cor }} badge-status">{{ t.get_prioridade_display }}</span></td>
+                    <td class="text-end" data-label="Ações">
                         <a href="{% url 'core:editar_tarefa' t.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
                         <form method="post" action="{% url 'core:excluir_tarefa' t.pk %}" class="d-inline">
                             {% csrf_token %}

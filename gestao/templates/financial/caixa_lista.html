@@ -99,22 +99,22 @@
         <tbody>
             {% for m in movimentos %}
             <tr>
-                <td>{{ m.data|date:'d/m/Y' }}</td>
-                <td>
+                <td data-label="Data">{{ m.data|date:'d/m/Y' }}</td>
+                <td data-label="Tipo">
                     {% if m.tipo == 'entrada' %}
                     <span class="badge bg-success bg-opacity-10 text-success">Entrada</span>
                     {% else %}
                     <span class="badge bg-danger bg-opacity-10 text-danger">Saída</span>
                     {% endif %}
                 </td>
-                <td>{{ m.get_categoria_display }}</td>
-                <td>{{ m.descricao|truncatewords:8 }}</td>
-                <td>{{ m.cliente.nome|default:'—' }}</td>
-                <td class="fw-bold {% if m.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+                <td data-label="Categoria">{{ m.get_categoria_display }}</td>
+                <td data-label="Descrição">{{ m.descricao|truncatewords:8 }}</td>
+                <td data-label="Cliente">{{ m.cliente.nome|default:'—' }}</td>
+                <td data-label="Valor" class="fw-bold {% if m.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
                     {{ m.valor|floatformat:2 }} MZN
                 </td>
-                <td>{{ m.get_forma_pagamento_display|default:'—' }}</td>
-                <td class="text-end">
+                <td data-label="Forma">{{ m.get_forma_pagamento_display|default:'—' }}</td>
+                <td class="text-end" data-label="Ações">
                     <a href="{% url 'financial_caixa_editar' m.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
                     <a href="{% url 'financial_caixa_excluir' m.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></a>
                 </td>

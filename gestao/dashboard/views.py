@@ -18,6 +18,47 @@ def home(request):
     hoje = date.today()
     limite = hoje + timedelta(days=5)
 
+    # ── Faturamento ──
+    inicio_mes = hoje.replace(day=1)
+
+    def _mes_atras(inicio, n):
+        y, m = inicio.year, inicio.month - n
+        while m <= 0:
+            m += 12
+            y -= 1
+        return date(y, m, 1)
+
+    inicio_ano = date(hoje.year, 1, 1)
+
+    faturado_mes = sum(
+        q.valor_total for q in Quote.objects.filter(
+            status='aprovada', data_emissao__gte=inicio_mes, data_emissao__lte=hoje))
+    faturado_ano = sum(
+        q.valor_total for q in Quote.objects.filter(
+            status='aprovada', data_emissao__gte=inicio_ano, data_emissao__lte=hoje))
+    recebido_mes = sum(
+        m.valor for m in CashFlow.objects.filter(
+            tipo='entrada', data__gte=inicio_mes, data__lte=hoje))
+
+    # ── Gráfico: faturado vs recebido, últimos 6 meses ──
+    meses_chart = []
+    for i in range(5, -1, -1):
+        mes_inicio = _mes_atras(inicio_mes, i)
+        mes_fim = mes_inicio.replace(day=28) + timedelta(days=4)
+        mes_fim = mes_fim.replace(day=1) - timedelta(days=1)
+        faturado = sum(q.valor_total for q in Quote.objects.filter(
+            status='aprovada', data_emissao__gte=mes_inicio, data_emissao__lte=mes_fim))
+        recebido = sum(m.valor for m in CashFlow.objects.filter(
+            tipo='entrada', data__gte=mes_inicio, data__lte=mes_fim))
+        meses_chart.append({
+            'rotulo': mes_inicio.strftime('%b'),
+            'faturado': faturado,
+            'recebido': recebido,
+            'atual': mes_inicio.year == hoje.year and mes_inicio.month == hoje.month,
+        })
+    max_mes = max(
+        [max(m['faturado'], m['recebido']) for m in meses_chart] or [0])
+
     # ── Propostas em jogo (cotações pendentes com dias restantes) ──
     cotacoes_pendentes_qs = Quote.objects.filter(status='pendente').select_related('cliente', 'projeto')
     propostas_urgentes = []
@@ -110,11 +151,17 @@ def home(request):
     ).select_related('projeto__cliente').order_by('data_prevista')
 
     return render(request, 'dashboard/home.html', {
+        'hoje': hoje,
         'total_clientes': total_clientes,
         'projetos_ativos': projetos_ativos,
         'projetos_concluidos': projetos_concluidos,
         'cotacoes_pendentes': cotacoes_pendentes,
         'total_pendente': total_pendente,
+        'faturado_mes': faturado_mes,
+        'faturado_ano': faturado_ano,
+        'recebido_mes': recebido_mes,
+        'meses_chart': meses_chart,
+        'max_mes': max_mes,
         'saldo_caixa': saldo_caixa,
         'total_entradas': total_entradas,
         'total_saidas': total_saidas,

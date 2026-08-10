@@ -265,6 +265,65 @@
     </div>
 </div>
 
+{% comment %} ── Faturamento ── {% endcomment %}
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="table-container border-start border-4 border-success">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow me-2 text-success"></i>Faturamento <span class="text-muted fs-6 fw-normal">— {{ hoje|date:"F" }} {{ hoje|date:"Y" }}</span></h6>
+                <a href="{% url 'financial_caixa_relatorio' %}" class="btn btn-sm btn-outline-accent">Relatório Mensal</a>
+            </div>
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <div class="position-relative h-100">
+                        <div class="text-muted small fw-semibold">Faturado (Mês)</div>
+                        <div class="fs-4 fw-bold text-success" style="font-size: clamp(1.15rem, 2.2vw, 1.75rem);">{{ faturado_mes|floatformat:0 }}</div>
+                        <small class="text-muted">MZN</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="position-relative h-100">
+                        <div class="text-muted small fw-semibold">Recebido (Mês)</div>
+                        <div class="fs-4 fw-bold text-primary" style="font-size: clamp(1.15rem, 2.2vw, 1.75rem);">{{ recebido_mes|floatformat:0 }}</div>
+                        <small class="text-muted">MZN</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="position-relative h-100">
+                        <div class="text-muted small fw-semibold">A Receber</div>
+                        <div class="fs-4 fw-bold {% if total_pendente > 0 %}text-warning{% else %}text-success{% endif %}" style="font-size: clamp(1.15rem, 2.2vw, 1.75rem);">{{ total_pendente|floatformat:0 }}</div>
+                        <small class="text-muted">MZN</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="position-relative h-100">
+                        <div class="text-muted small fw-semibold">Faturado (Ano)</div>
+                        <div class="fs-4 fw-bold" style="font-size: clamp(1.15rem, 2.2vw, 1.75rem);">{{ faturado_ano|floatformat:0 }}</div>
+                        <small class="text-muted">MZN</small>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <small class="text-muted fw-semibold">Últimos 6 meses</small>
+                <span class="badge badge-status bg-primary bg-opacity-10 text-primary">Recebido</span>
+                <span class="badge badge-status bg-success bg-opacity-10 text-success">Faturado</span>
+            </div>
+            <div class="d-flex align-items-end gap-2 gap-md-3" style="height:130px;">
+                {% for m in meses_chart %}
+                <div class="flex-fill d-flex flex-column justify-content-end align-items-center gap-1 h-100" title="Faturado: {{ m.faturado|floatformat:0 }} · Recebido: {{ m.recebido|floatformat:0 }}">
+                    <div class="d-flex align-items-end gap-1 w-100 flex-grow-1 justify-content-center">
+                        <div class="bar-chart faturado" style="height:{% if max_mes %}{% widthratio m.faturado max_mes 100 %}{% else %}0{% endif %}%;"></div>
+                        <div class="bar-chart recebido" style="height:{% if max_mes %}{% widthratio m.recebido max_mes 100 %}{% else %}0{% endif %}%;"></div>
+                    </div>
+                    <small class="text-muted {% if m.atual %}fw-bold text-primary{% endif %}" style="font-size:0.7rem;">{{ m.rotulo }}</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
 {% if execucao_detalhe %}
 <div class="row g-3 mb-4">
     <div class="col-12">
@@ -384,8 +443,8 @@
                 <tbody>
                     {% for c in ultimos_clientes %}
                     <tr>
-                        <td><a href="{% url 'crm_editar' c.pk %}" class="text-decoration-none fw-medium">{{ c.nome }}</a></td>
-                        <td>{{ c.telefone|default:'-' }}</td>
+                        <td data-label="Nome"><a href="{% url 'crm_editar' c.pk %}" class="text-decoration-none fw-medium">{{ c.nome }}</a></td>
+                        <td data-label="Contacto">{{ c.telefone|default:'-' }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -418,10 +477,10 @@
                 <tbody>
                     {% for q in ultimas_cotacoes %}
                     <tr>
-                        <td><a href="{% url 'financial_detalhe' q.pk %}" class="text-decoration-none">{{ q.numero }}</a></td>
-                        <td>{{ q.cliente.nome }}</td>
-                        <td>{{ q.valor_total|floatformat:2 }} MZN</td>
-                        <td><span class="badge bg-{% if q.status == 'aprovada' %}success{% elif q.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">{{ q.get_status_display }}</span></td>
+                        <td data-label="Nº"><a href="{% url 'financial_detalhe' q.pk %}" class="text-decoration-none">{{ q.numero }}</a></td>
+                        <td data-label="Cliente">{{ q.cliente.nome }}</td>
+                        <td data-label="Valor">{{ q.valor_total|floatformat:2 }} MZN</td>
+                        <td data-label="Status"><span class="badge bg-{% if q.status == 'aprovada' %}success{% elif q.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">{{ q.get_status_display }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -457,9 +516,9 @@
                 <tbody>
                     {% for p in ultimos_projetos %}
                     <tr>
-                        <td><a href="{% url 'projects_detalhe' p.pk %}" class="text-decoration-none fw-medium">{{ p.nome }}</a></td>
-                        <td>{{ p.cliente.nome }}</td>
-                        <td style="min-width:120px;">
+                        <td data-label="Projeto"><a href="{% url 'projects_detalhe' p.pk %}" class="text-decoration-none fw-medium">{{ p.nome }}</a></td>
+                        <td data-label="Cliente">{{ p.cliente.nome }}</td>
+                        <td data-label="Progresso" style="min-width:120px;">
                             {% if p.total_etapas > 0 %}
                             <div class="d-flex align-items-center gap-2">
                                 <div class="progress flex-grow-1" style="height:6px;">
@@ -471,7 +530,7 @@
                             <span class="text-muted small">—</span>
                             {% endif %}
                         </td>
-                        <td><span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% else %}primary{% endif %} badge-status">{{ p.get_status_display }}</span></td>
+                        <td data-label="Status"><span class="badge bg-{% if p.status == 'concluido' %}success{% elif p.status == 'cancelado' %}danger{% else %}primary{% endif %} badge-status">{{ p.get_status_display }}</span></td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -507,16 +566,16 @@
                 <tbody>
                     {% for m in ultimos_movimentos %}
                     <tr>
-                        <td>{{ m.data|date:'d/m/Y' }}</td>
-                        <td>
+                        <td data-label="Data">{{ m.data|date:'d/m/Y' }}</td>
+                        <td data-label="Tipo">
                             {% if m.tipo == 'entrada' %}
                             <span class="badge bg-success bg-opacity-10 text-success">Entrada</span>
                             {% else %}
                             <span class="badge bg-danger bg-opacity-10 text-danger">Saída</span>
                             {% endif %}
                         </td>
-                        <td>{{ m.descricao|truncatewords:8 }}</td>
-                        <td class="fw-bold {% if m.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+                        <td data-label="Descrição">{{ m.descricao|truncatewords:8 }}</td>
+                        <td data-label="Valor" class="fw-bold {% if m.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
                             {{ m.valor|floatformat:2 }} MZN
                         </td>
                     </tr>

@@ -62,20 +62,20 @@
         <tbody>
             {% for linha in linhas %}
             <tr>
-                <td>{{ linha.movimento.data|date:'d/m/Y' }}</td>
-                <td>
+                <td data-label="Data">{{ linha.movimento.data|date:'d/m/Y' }}</td>
+                <td data-label="Tipo">
                     {% if linha.movimento.tipo == 'entrada' %}
                     <span class="badge bg-success bg-opacity-10 text-success">Entrada</span>
                     {% else %}
                     <span class="badge bg-danger bg-opacity-10 text-danger">Saída</span>
                     {% endif %}
                 </td>
-                <td>{{ linha.movimento.get_categoria_display }}</td>
-                <td>{{ linha.movimento.descricao|truncatewords:10 }}</td>
-                <td class="fw-bold {% if linha.movimento.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
+                <td data-label="Categoria">{{ linha.movimento.get_categoria_display }}</td>
+                <td data-label="Descrição">{{ linha.movimento.descricao|truncatewords:10 }}</td>
+                <td data-label="Valor" class="fw-bold {% if linha.movimento.tipo == 'entrada' %}text-success{% else %}text-danger{% endif %}">
                     {{ linha.movimento.valor|floatformat:2 }} MZN
                 </td>
-                <td class="fw-bold">{{ linha.saldo|floatformat:2 }} MZN</td>
+                <td data-label="Saldo Acumulado" class="fw-bold">{{ linha.saldo|floatformat:2 }} MZN</td>
             </tr>
             {% endfor %}
         </tbody>

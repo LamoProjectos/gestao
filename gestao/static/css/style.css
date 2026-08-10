@@ -578,3 +578,23 @@ body { background: var(--bg); min-height: 100vh; }
         margin-left: var(--sidebar-width);
     }
 }
+
+/* Bar chart (faturamento) */
+.bar-chart {
+    width: 100%;
+    max-width: 26px;
+    border-radius: 4px 4px 0 0;
+    min-height: 2px;
+    transition: height 0.3s ease;
+}
+
+.bar-chart.faturado { background: #10b981; opacity: 0.85; }
+.bar-chart.recebido { background: #2563eb; opacity: 0.85; }
+
+.bar-chart:hover { opacity: 1; }
+
+@media (max-width: 575.98px) {
+    .stat-card .card-body { padding: 0.85rem; }
+    .stat-number { font-size: 1.2rem; }
+    .stat-icon { width: 40px; height: 40px; font-size: 1.15rem; }
+}

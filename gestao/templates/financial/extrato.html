@@ -37,13 +37,13 @@
         <tbody>
             {% for p in pagamentos %}
             <tr>
-                <td>{{ p.cotacao.cliente.nome }}</td>
-                <td>{{ p.prestacao }}ª - {{ p.cotacao.numero }}</td>
-                <td>{{ p.valor|floatformat:2 }} MZN</td>
-                <td>{{ p.data_vencimento|date:'d/m/Y' }}</td>
-                <td>{{ p.data_pagamento|date:'d/m/Y'|default:'—' }}</td>
-                <td>{{ p.metodo|default:'—' }}</td>
-                <td>
+                <td data-label="Cliente">{{ p.cotacao.cliente.nome }}</td>
+                <td data-label="Prestação">{{ p.prestacao }}ª - {{ p.cotacao.numero }}</td>
+                <td data-label="Valor">{{ p.valor|floatformat:2 }} MZN</td>
+                <td data-label="Vencimento">{{ p.data_vencimento|date:'d/m/Y' }}</td>
+                <td data-label="Pagamento">{{ p.data_pagamento|date:'d/m/Y'|default:'—' }}</td>
+                <td data-label="Método">{{ p.metodo|default:'—' }}</td>
+                <td data-label="Status">
                     <span class="badge bg-{% if p.status == 'pago' %}success{% elif p.status == 'atrasado' %}danger{% else %}warning{% endif %} badge-status">
                         {{ p.get_status_display }}
                     </span>

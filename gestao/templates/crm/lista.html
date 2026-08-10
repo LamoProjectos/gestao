@@ -29,12 +29,12 @@
         <tbody>
             {% for c in clientes %}
             <tr>
-                <td class="fw-medium">{{ c.nome }}</td>
-                <td>{{ c.telefone|default:'-' }}</td>
-                <td>{{ c.email|default:'-' }}</td>
-                <td>{{ c.nuit|default:'-' }}</td>
-                <td>{{ c.projetos.count }}</td>
-                <td class="text-end">
+                <td class="fw-medium" data-label="Nome">{{ c.nome }}</td>
+                <td data-label="Telefone">{{ c.telefone|default:'-' }}</td>
+                <td data-label="Email">{{ c.email|default:'-' }}</td>
+                <td data-label="NUIT">{{ c.nuit|default:'-' }}</td>
+                <td data-label="Projetos">{{ c.projetos.count }}</td>
+                <td class="text-end" data-label="Ações">
                     <a href="{% url 'crm_editar' c.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
                     <a href="{% url 'projects_novo' %}?cliente={{ c.pk }}" class="btn btn-sm btn-outline-accent" title="Novo Projeto"><i class="bi bi-plus-circle"></i></a>
                     <a href="{% url 'crm_excluir' c.pk %}" class="btn btn-sm btn-outline-danger" title="Excluir"><i class="bi bi-trash"></i></a>

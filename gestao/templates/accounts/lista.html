@@ -25,24 +25,24 @@
         <tbody>
             {% for u in utilizadores %}
             <tr>
-                <td class="fw-medium">{{ u.username }}</td>
-                <td>{{ u.get_full_name|default:'-' }}</td>
-                <td>{{ u.email|default:'-' }}</td>
-                <td>
+                <td class="fw-medium" data-label="Utilizador">{{ u.username }}</td>
+                <td data-label="Nome">{{ u.get_full_name|default:'-' }}</td>
+                <td data-label="Email">{{ u.email|default:'-' }}</td>
+                <td data-label="Grupos">
                     {% for g in u.groups.all %}
                     <span class="badge {% if g.name == 'Admin' %}bg-danger{% elif g.name == 'Gestor' %}bg-primary{% else %}bg-secondary{% endif %} badge-status">{{ g.name }}</span>
                     {% empty %}
                     <span class="text-muted">—</span>
                     {% endfor %}
                 </td>
-                <td>
+                <td data-label="Estado">
                     {% if u.is_active %}
                     <span class="badge bg-success badge-status">Ativo</span>
                     {% else %}
                     <span class="badge bg-danger badge-status">Inativo</span>
                     {% endif %}
                 </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Ações">
                     <a href="{% url 'accounts:editar_utilizador' u.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
                     {% if u.is_active %}
                     <a href="{% url 'accounts:desativar_utilizador' u.pk %}" class="btn btn-sm btn-outline-danger" title="Desativar"><i class="bi bi-person-x"></i></a>

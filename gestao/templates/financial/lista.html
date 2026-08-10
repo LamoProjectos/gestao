@@ -24,19 +24,19 @@
         <tbody>
             {% for q in cotacoes %}
             <tr>
-                <td class="fw-medium">{{ q.numero }}</td>
-                <td>{{ q.cliente.nome }}</td>
-                <td>{{ q.data_emissao|date:'d/m/Y' }}</td>
-                <td>{{ q.valor_total|floatformat:2 }} MZN</td>
-                <td class="{% if q.saldo_pendente > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                <td class="fw-medium" data-label="Nº">{{ q.numero }}</td>
+                <td data-label="Cliente">{{ q.cliente.nome }}</td>
+                <td data-label="Data">{{ q.data_emissao|date:'d/m/Y' }}</td>
+                <td data-label="Valor Total">{{ q.valor_total|floatformat:2 }} MZN</td>
+                <td data-label="Saldo" class="{% if q.saldo_pendente > 0 %}text-danger fw-bold{% else %}text-success{% endif %}">
                     {{ q.saldo_pendente|floatformat:2 }} MZN
                 </td>
-                <td>
+                <td data-label="Status">
                     <span class="badge bg-{% if q.status == 'aprovada' %}success{% elif q.status == 'pendente' %}warning{% else %}danger{% endif %} badge-status">
                         {{ q.get_status_display }}
                     </span>
                 </td>
-                <td class="text-end">
+                <td class="text-end" data-label="Ações">
                     <a href="{% url 'financial_detalhe' q.pk %}" class="btn btn-sm btn-outline-accent" title="Detalhes"><i class="bi bi-eye"></i></a>
                     {% if is_admin %}<a href="{% url 'doc_cotacao_pdf' q.pk %}" class="btn btn-sm btn-outline-secondary" target="_blank" title="PDF"><i class="bi bi-filetype-pdf"></i></a>{% endif %}
                     {% if is_admin %}<a href="{% url 'financial_editar' q.pk %}" class="btn btn-sm btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>{% endif %}

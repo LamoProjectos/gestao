@@ -130,19 +130,19 @@
                     <tbody>
                         {% for e in etapas %}
                         <tr class="{% if e.concluida %}table-success{% elif e.status_cor == 'danger' %}table-danger{% elif e.status_cor == 'warning' %}table-warning{% endif %}">
-                            <td>{{ e.ordem }}</td>
-                            <td>
+                            <td data-label="#"> {{ e.ordem }}</td>
+                            <td data-label="Etapa">
                                 <span class="d-inline-block rounded-circle me-1" style="width:8px;height:8px;background:var(--bs-{{ e.status_cor }});"></span>
                                 {{ e.nome }}
                             </td>
-                            <td>{{ e.data_prevista|date:'d/m/Y'|default:'—' }}
+                            <td data-label="Data Prevista">{{ e.data_prevista|date:'d/m/Y'|default:'—' }}
                                 {% if e.dias_restantes != None and not e.concluida %}
                                 <br><small class="{% if e.dias_restantes < 0 %}text-danger{% else %}text-muted{% endif %}">
                                     {{ e.dias_restantes|stringformat:'+d' }} dias
                                 </small>
                                 {% endif %}
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 {% if e.concluida %}
                                 <span class="badge bg-success badge-status"><i class="bi bi-check"></i> Concluída</span>
                                 {% elif e.status_cor == 'danger' %}
@@ -153,7 +153,7 @@
                                 <span class="badge bg-secondary badge-status">Pendente</span>
                                 {% endif %}
                             </td>
-                            <td class="text-end">
+                            <td class="text-end" data-label="Ações">
                                 <form method="post" action="{% url 'projects_concluir_etapa' e.pk %}" style="display:inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-sm {% if e.concluida %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="{% if e.concluida %}Reabrir{% else %}Concluir{% endif %}">

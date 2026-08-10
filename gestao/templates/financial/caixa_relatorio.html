@@ -20,10 +20,10 @@
             <tbody>
                 {% for dados in meses %}
                 <tr>
-                    <td class="fw-medium">{{ dados.mes|title }}</td>
-                    <td class="text-success fw-bold">{{ dados.entradas|floatformat:2 }} MZN</td>
-                    <td class="text-danger fw-bold">{{ dados.saidas|floatformat:2 }} MZN</td>
-                    <td class="fw-bold {% if dados.saldo < 0 %}text-danger{% else %}text-success{% endif %}">
+                    <td data-label="Mês" class="fw-medium">{{ dados.mes|title }}</td>
+                    <td data-label="Entradas" class="text-success fw-bold">{{ dados.entradas|floatformat:2 }} MZN</td>
+                    <td data-label="Saídas" class="text-danger fw-bold">{{ dados.saidas|floatformat:2 }} MZN</td>
+                    <td data-label="Saldo do Mês" class="fw-bold {% if dados.saldo < 0 %}text-danger{% else %}text-success{% endif %}">
                         {{ dados.saldo|floatformat:2 }} MZN
                     </td>
                     <td style="width:200px;">
